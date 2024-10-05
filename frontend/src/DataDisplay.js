@@ -8,7 +8,7 @@ const DataDisplay = () => {
 
   useEffect(() => {
     const { latitude, longitude, startDate, endDate, cloudCoverage } = location.state;
-
+  
     const fetchPixelData = async () => {
       try {
         const response = await fetch('/api/get-landsat-data', {
@@ -24,10 +24,11 @@ const DataDisplay = () => {
             cloudCoverage,
           }),
         });
-
+  
         const data = await response.json();
         if (response.ok) {
           setPixelData(data);
+          console.log('Received data:', data); // Log the received data
         } else {
           setError(data.error || 'An error occurred while fetching data.');
         }
@@ -35,7 +36,7 @@ const DataDisplay = () => {
         setError('Failed to fetch data from the server.');
       }
     };
-
+  
     fetchPixelData();
   }, [location.state]);
 

@@ -4,19 +4,34 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from apscheduler.schedulers.background import BackgroundScheduler
 from config import Config
 from tasks import notify_user
-from util import get_landsat_overpasses, send_sms, init_earth_engine
+from util import get_landsat_overpasses, send_sms#, init_earth_engine
 from flask_mail import Mail, Message
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from flask_apscheduler import APScheduler
 import datetime
 import os
+import ee
+
 
 # Initialize the database and scheduler
 db = SQLAlchemy()
 scheduler = APScheduler()
 load_dotenv()
 mail = Mail()
+
+# Initialize Google Earth Engine with Service Account Credentials
+def init_earth_engine():
+    try:
+        credentials = ee.ServiceAccountCredentials(
+            Config.GEE_SERVICE_ACCOUNT_EMAIL, Config.GEE_SERVICE_ACCOUNT_KEY_FILE_PATH
+        )
+        ee.Initialize(credentials)
+        print("Google Earth Engine initialized successfully.")
+    except Exception as e:
+        print(f"Failed to initialize Google Earth Engine: {e}")
+
+
 
 def create_app():
     app = Flask(__name__, static_folder='../../frontend/build', static_url_path='/')
@@ -77,20 +92,52 @@ def create_app():
     
     @app.route('/api/get-landsat-data', methods=['POST'])
     def get_landsat_data():
+
         # Access JSON data from the request
-        data = request.json
-        
-        latitude = float(data['latitude'])
-        longitude = float(data['longitude'])
-        start_date = data['startDate']
-        end_date = data['endDate']
-        cloud_coverage = data['cloudCoverage']
+        # data = request.json
 
-        # Query Landsat overpasses using Earth Engine (you may have a specific function for this)
-        overpasses = get_landsat_overpasses(latitude, longitude, start_date)
+        # latitude = float(data['latitude'])
+        # longitude = float(data['longitude'])
+        # start_date = data['startDate']
+        # end_date = data['endDate']
+        # cloud_coverage = float(data['cloudCoverage'])
 
-        # Return the overpass metadata as JSON
-        return jsonify(overpasses)
+        # Create a point geometry
+        # point = ee.Geometry.Point([longitude, latitude])
+        lat = 45.4215
+        lon = -75.6972
+        point = ee.Geometry.Point([lon, lat])
+
+
+        # Filter the Landsat 9 image collection
+        # collection = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
+        #     .filterDate(start_date, end_date) \
+        #     .filterBounds(point) \
+        #     .filter(ee.Filter.lt('CLOUD_COVER', cloud_coverage))
+        landsat_sr = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
+                .filterBounds(point) \
+                .filterDate('2023-01-01', '2023-12-31') \
+                .filter(ee.Filter.lt('CLOUD_COVER', 10))
+
+        # Get the first image from the collection
+        # image = collection.first()
+        image = landsat_sr.first()
+        # Check if an image exists
+        if image.getInfo() is None:
+            return jsonify({'error': 'No images found for the given parameters.'}), 404
+
+        # Get the pixel value at the point
+        selected_pixel = image.sample(point, scale=30).first().toDictionary().getInfo()
+
+        # Get surrounding pixels (e.g., a 3x3 window around the point)
+        neighborhood = image.neighborhoodToArray(ee.Kernel.square(1))
+        neighborhood_values = neighborhood.sample(point, scale=30).first().toDictionary().getInfo()
+
+        # Return the pixel data
+        return jsonify({
+            'selectedPixel': selected_pixel,
+            'surroundingPixels': neighborhood_values
+        })
 
     @app.route('/schedule', methods=['POST'])
     @login_required

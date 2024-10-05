@@ -4,17 +4,6 @@ from email.mime.text import MIMEText
 from config import Config
 
 
-# Initialize Google Earth Engine with Service Account Credentials
-def init_earth_engine():
-    try:
-        credentials = ee.ServiceAccountCredentials(
-            Config.GEE_SERVICE_ACCOUNT_EMAIL, Config.GEE_SERVICE_ACCOUNT_KEY
-        )
-        ee.Initialize(credentials)
-        print("Google Earth Engine initialized successfully.")
-    except Exception as e:
-        print(f"Failed to initialize Google Earth Engine: {e}")
-
 
 # Fetch real-time Landsat overpasses using Google Earth Engine
 def get_landsat_overpasses(latitude, longitude, date):
@@ -22,12 +11,12 @@ def get_landsat_overpasses(latitude, longitude, date):
         # Define the point of interest
         point = ee.Geometry.Point([longitude, latitude])
 
-        # Specify the Landsat-8 image collection
+        # Specify the Landsat-8 Collection 2 Level 2 image collection
         collection = (
-            ee.ImageCollection("LANDSAT/LC08/C01/T1_SR")
+            ee.ImageCollection("LANDSAT/LC08/C02/T1_L2")
             .filterBounds(point)
             .filterDate(ee.Date(date), ee.Date(date).advance(1, "day"))
-            .sort("CLOUD_COVER")
+            .sort("CLOUD_COVER_LAND")
         )
 
         # Get list of overpasses
