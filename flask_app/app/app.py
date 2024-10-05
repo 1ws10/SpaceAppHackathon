@@ -64,7 +64,6 @@ def create_app():
         return jsonify({"message": "Welcome to the dashboard!"})
 
     @app.route('/search', methods=['POST'])
-    @login_required
     def search():
         latitude = float(request.form['latitude'])
         longitude = float(request.form['longitude'])
@@ -72,6 +71,23 @@ def create_app():
 
         # Query Landsat overpasses using Earth Engine
         overpasses = get_landsat_overpasses(latitude, longitude, date)
+
+        # Return the overpass metadata as JSON
+        return jsonify(overpasses)
+    
+    @app.route('/api/get-landsat-data', methods=['POST'])
+    def get_landsat_data():
+        # Access JSON data from the request
+        data = request.json
+        
+        latitude = float(data['latitude'])
+        longitude = float(data['longitude'])
+        start_date = data['startDate']
+        end_date = data['endDate']
+        cloud_coverage = data['cloudCoverage']
+
+        # Query Landsat overpasses using Earth Engine (you may have a specific function for this)
+        overpasses = get_landsat_overpasses(latitude, longitude, start_date)
 
         # Return the overpass metadata as JSON
         return jsonify(overpasses)
