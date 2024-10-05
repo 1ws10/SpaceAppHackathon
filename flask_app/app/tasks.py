@@ -10,7 +10,7 @@ def notify_user(user_id, latitude, longitude):
         return
 
     # Get current date in YYYY-MM-DD format
-    today = datetime.utcnow().strftime('%Y-%m-%d')
+    today = datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
 
     # Fetch Landsat overpass data for the user's location
     overpasses = get_landsat_overpasses(latitude, longitude, today)
@@ -22,7 +22,9 @@ def notify_user(user_id, latitude, longitude):
     # Notify user about the upcoming satellite pass
     for pass_info in overpasses["overpasses"]:
         satellite = pass_info["satellite"]
-        overpass_time = datetime.utcfromtimestamp(pass_info["overpass_time"] / 1000).strftime('%Y-%m-%d %H:%M:%S')
+        overpass_time = datetime.utcfromtimestamp(
+            pass_info["overpass_time"] / 1000
+        ).strftime("%Y-%m-%d %H:%M:%S")
 
         message = f"Satellite {satellite} will pass over your location on {overpass_time} UTC."
 
@@ -36,4 +38,6 @@ def notify_user(user_id, latitude, longitude):
         except Exception as e:
             print(f"Failed to send SMS to {user.phone}: {e}")
 
-        print(f"Notification sent to {user.email if user.email else user.phone} about {satellite} at {overpass_time}")
+        print(
+            f"Notification sent to {user.email if user.email else user.phone} about {satellite} at {overpass_time}"
+        )
