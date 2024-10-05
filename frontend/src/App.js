@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-ro
 import { Container, Navbar, Nav } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Search from './Search'; // Import the Search component
+import DataDisplay from './DataDisplay'; // Import the new DataDisplay component
+
 
 const App = () => {
   const [token, setToken] = useState(null);
@@ -22,6 +24,7 @@ const App = () => {
         <Routes>
           <Route path="/search" element={<Search />} /> {/* Route to the Search component */}
           <Route path="/" element={<Navigate to="/search" />} />
+          <Route path="/data-display" element={<DataDisplay />} />
         </Routes>
       </Container>
     </Router>
