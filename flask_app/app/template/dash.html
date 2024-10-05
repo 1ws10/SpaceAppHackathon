@@ -1,0 +1,12 @@
+<h2>Welcome {{ current_user.email }}</h2>
+<form method="POST" action="/search">
+    <input type="text" name="latitude" placeholder="Latitude" required>
+    <input type="text" name="longitude" placeholder="Longitude" required>
+    <input type="date" name="date" placeholder="Date" required>
+    <button type="submit">Search Satellite Passes</button>
+</form>
+<form method="POST" action="/schedule">
+    <input type="text" name="satellite" placeholder="Satellite Name" required>
+    <input type="datetime-local" name="notify_time" required>
+    <button type="submit">Schedule Notification</button>
+</form>
