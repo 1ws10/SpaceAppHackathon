@@ -1,31 +1,29 @@
+// src/App.js
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
-import { Navbar, Nav } from 'react-bootstrap';
-import Login from './Login';
-import Register from './Register';
-import Home from './Home';
+import { Container, Navbar, Nav } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Search from './Search'; // Import the Search component
 
 const App = () => {
   const [token, setToken] = useState(null);
+  const [location, setLocation] = useState(null);
 
   return (
     <Router>
       <Navbar bg="light" expand="lg">
         <Navbar.Brand as={Link} to="/">MyApp</Navbar.Brand>
         <Nav className="ml-auto">
-          <Nav.Link as={Link} to="/login">Login</Nav.Link>
-          <Nav.Link as={Link} to="/register">Register</Nav.Link>
-          <Nav.Link as={Link} to="/home">Home</Nav.Link>
+       
+          <Nav.Link as={Link} to="/search">Map Search</Nav.Link> {/* Add a link to Search */}
         </Nav>
       </Navbar>
-
-      <Routes>
-        <Route path="/login" element={<Login setToken={setToken} />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/home" element={token ? <Home /> : <Navigate to="/login" />} />
-        <Route path="/" element={<Navigate to="/login" />} />
-      </Routes>
+      <Container className="mt-5">
+        <Routes>
+          <Route path="/search" element={<Search />} /> {/* Route to the Search component */}
+          <Route path="/" element={<Navigate to="/search" />} />
+        </Routes>
+      </Container>
     </Router>
   );
 };
