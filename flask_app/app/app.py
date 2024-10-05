@@ -11,8 +11,15 @@ from flask import Flask
 from util import init_earth_engine  # Import your init function
 from flask_mail import Mail, Message
 from dotenv import load_dotenv
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_apscheduler import APScheduler
+from config import Config
+import ee
 
-
+# Initialize the database and scheduler
+db = SQLAlchemy()
+scheduler = APScheduler()
 load_dotenv()
 mail = Mail()
 
@@ -23,15 +30,18 @@ def create_app():
     # Initialize Earth Engine
     init_earth_engine()
 
-
+    # Initialize the database with the app
     db.init_app(app)
     mail.init_app(app)  # Initialize Flask-Mail
 
     login_manager = LoginManager()
     login_manager.init_app(app)
 
-    scheduler = BackgroundScheduler()  # No need to bind scheduler with app
-    scheduler.start()
+    # scheduler = BackgroundScheduler()  # No need to bind scheduler with app
+    # scheduler.start()
+    # Initialize the scheduler
+    scheduler.init_app(app)
+    # scheduler.start()
 
     return app, scheduler
 
@@ -137,4 +147,11 @@ def schedule_notification():
 
 
 if __name__ == '__main__':
+    app, scheduler = create_app()
+
+    # Create the database tables if they do not exist
+    with app.app_context():
+        db.create_all()
+
+    # Run the app
     app.run(debug=True)
