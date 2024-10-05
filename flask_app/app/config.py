@@ -12,8 +12,7 @@ class Config:
     TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
 
     # Google Earth Engine Service Account Credentials
-    GEE_SERVICE_ACCOUNT_KEY = "path_to_your-private-key.json"
-    GEE_SERVICE_ACCOUNT_EMAIL = os.getenv('GEE_SERVICE_ACCOUNT_EMAIL', "your_service_account_email")
+    GEE_SERVICE_ACCOUNT_EMAIL = os.getenv('GEE_SERVICE_ACCOUNT_EMAIL', "demoserviceaccount@ca2rcnasaapps.iam.gserviceaccount.com")
     GEE_SERVICE_ACCOUNT_KEY = os.getenv('GEE_SERVICE_ACCOUNT_KEY', "ca2rcnasaapps-8f08cba490d7.json")
 
     # SQLAlchemy settings
