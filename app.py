@@ -34,7 +34,7 @@ def fetch():
     time_range = f"{start_date_rfc3339}/{end_date_rfc3339}"
     print(time_range)
 
-    return sample_data
+    return sampledata.sample_data
 
 
 if __name__ == "__main__":
