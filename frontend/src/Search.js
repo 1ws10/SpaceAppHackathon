@@ -1,7 +1,7 @@
-// src/Search.js
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
-import { Row, Form, Container, Navbar, Nav } from 'react-bootstrap';
+import { Row, Form, Container, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const Search = () => {
   const [position, setPosition] = useState([0, 0]); // Default position (0, 0)
@@ -11,6 +11,9 @@ const Search = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [cloudCoverage, setCloudCoverage] = useState(0);
+
+  const navigate = useNavigate(); // Initialize useNavigate
+
   const MapClickHandler = () => {
     useMapEvents({
       click(e) {
@@ -22,19 +25,19 @@ const Search = () => {
     });
     return null;
   };
-  const handleSearch = () => {
-    const formData = {
-      latitude: parseFloat(latitude),
-      longitude: parseFloat(longitude),
-      startDate,
-      endDate,
-      cloudCoverage,
-    };
-     // Convert formData to query string for GET request
-     const queryString = new URLSearchParams(formData).toString();
-     console.log('GET request data:', queryString);
-     // Make your GET request here using fetch or axios
-   };
+
+  // Handler to navigate to DataDisplay with the selected data
+  const handleNavigate = () => {
+    navigate('/data-display', {
+      state: {
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
+        startDate,
+        endDate,
+        cloudCoverage: parseInt(cloudCoverage),
+      },
+    });
+  };
 
   return (
     <div>
@@ -54,7 +57,7 @@ const Search = () => {
       </MapContainer>
       <div className="mt-3">
         <Form>
-        <Form.Group controlId="latitude">
+          <Form.Group controlId="latitude">
             <Form.Label>Latitude</Form.Label>
             <Form.Control
               type="text"
@@ -90,8 +93,6 @@ const Search = () => {
                 />
               </Form.Group>
             </Row>
-              
-            
           </Form.Group>
           <Form.Group controlId="cloudCoverage">
             <Form.Label>Cloud Coverage (%)</Form.Label>
@@ -106,7 +107,10 @@ const Search = () => {
           </Form.Group>
         </Form>
       </div>
-      
+      {/* Button to trigger navigation */}
+      <Button className="mt-3" onClick={handleNavigate}>
+        View Landsat Data
+      </Button>
     </div>
   );
 };
