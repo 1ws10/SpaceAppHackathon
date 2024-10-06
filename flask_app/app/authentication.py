@@ -21,8 +21,10 @@ def createLogin(email: str, password: str):
     except sqlite3.IntegrityError as e:
         if "UNIQUE constraint failed: User.email" in str(e):
             print(f"Error: The email '{email}' is already registered.")
+            raise e
         else:
             print(f"SQLite error: {e}")
+            raise e
     return
 
 # Testing

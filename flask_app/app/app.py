@@ -12,6 +12,8 @@ from flask_apscheduler import APScheduler
 import datetime
 import os
 import ee
+import authentication
+import sqlite3
 
 
 # Initialize the database and scheduler
@@ -56,22 +58,22 @@ def create_app():
     def login():
         email = request.form['email']
         password = request.form['password']
-        user = User.query.filter_by(email=email).first()
-        if user and check_password_hash(user.password, password):
-            login_user(user)
-            return redirect(url_for('dashboard'))
-        return jsonify({"message": "Invalid credentials"}), 401
+        loggedIn = authentication.login(email, password)
+        if not loggedIn:
+            return jsonify({'message': 'Invalid email or password.'}), 401
+        return jsonify({'message': 'Login successful!'}), 200
 
     @app.route('/register', methods=['POST'])
     def register():
         email = request.form['email']
         password = request.form['password']
-        hashed_password = generate_password_hash(password, method='sha256')
-        new_user = User(email=email, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-        login_user(new_user)
-        return jsonify({"message": "User registered successfully!"})
+        try:
+            authentication.createLogin(email, password)
+            return jsonify({"message": "User registered successfully!"})
+        except sqlite3.IntegrityError as e:
+            return jsonify({"message: User registration unsuccessful"}, 401)
+        return
+        
 
     @app.route('/dashboard')
     @login_required
