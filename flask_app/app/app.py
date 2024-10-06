@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, request, jsonify, redirect, url_for
+from flask import Flask, Response, send_from_directory, request, jsonify, redirect, url_for, send_file
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -12,7 +12,11 @@ from flask_apscheduler import APScheduler
 import datetime
 import os
 import ee
-
+import datetime
+import os
+import base64
+import io
+import requests
 
 # Initialize the database and scheduler
 db = SQLAlchemy()
@@ -92,53 +96,70 @@ def create_app():
     
     @app.route('/api/get-landsat-data', methods=['POST'])
     def get_landsat_data():
-
-        # Access JSON data from the request
         # data = request.json
 
         # latitude = float(data['latitude'])
         # longitude = float(data['longitude'])
-        # start_date = data['startDate']
-        # end_date = data['endDate']
-        # cloud_coverage = float(data['cloudCoverage'])
+        start_date = '2023-01-01' # data['startDate']
+        end_date = '2023-12-31'# data['endDate']
+        cloud_coverage = 10 # float(data['cloudCoverage'])
 
-        # Create a point geometry
         # point = ee.Geometry.Point([longitude, latitude])
-        lat = 45.4215
-        lon = -75.6972
-        point = ee.Geometry.Point([lon, lat])
-
-
-        # Filter the Landsat 9 image collection
+        
         # collection = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
         #     .filterDate(start_date, end_date) \
         #     .filterBounds(point) \
         #     .filter(ee.Filter.lt('CLOUD_COVER', cloud_coverage))
-        landsat_sr = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
-                .filterBounds(point) \
-                .filterDate('2023-01-01', '2023-12-31') \
-                .filter(ee.Filter.lt('CLOUD_COVER', 10))
 
-        # Get the first image from the collection
-        # image = collection.first()
-        image = landsat_sr.first()
-        # Check if an image exists
+        # 
+
+        # Define the location
+        latitude = 45.4215
+        longitude = -75.6972
+        point = ee.Geometry.Point([longitude, latitude])
+
+        # Load Landsat 9 Surface Reflectance Image Collection
+        collection = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
+                        .filterBounds(point) \
+                        .filterDate(start_date, end_date) \
+                        .filter(ee.Filter.lt('CLOUD_COVER', cloud_coverage))
+        
+        image = collection.first()
+
         if image.getInfo() is None:
             return jsonify({'error': 'No images found for the given parameters.'}), 404
 
-        # Get the pixel value at the point
-        selected_pixel = image.sample(point, scale=30).first().toDictionary().getInfo()
+        vis_params = {
+            'bands': ['SR_B4', 'SR_B3', 'SR_B2'],
+            'min': 0,
+            'max': 3000,
+        }
 
-        # Get surrounding pixels (e.g., a 3x3 window around the point)
-        neighborhood = image.neighborhoodToArray(ee.Kernel.square(1))
-        neighborhood_values = neighborhood.sample(point, scale=30).first().toDictionary().getInfo()
+        map_dict = image.getMapId(vis_params)
 
-        # Return the pixel data
         return jsonify({
-            'selectedPixel': selected_pixel,
-            'surroundingPixels': neighborhood_values
+            'mapid': map_dict['mapid'],
+            'token': map_dict['token'],
+            'latitude': latitude,
+            'longitude': longitude
         })
 
+    
+    @app.route('/tiles/<path:mapid>/<int:z>/<int:x>/<int:y>.png')
+    def get_tile(mapid, z, x, y):
+        token = request.args.get('token', None)
+        if token:
+            tile_url = f'https://earthengine.googleapis.com/map/{mapid}/{z}/{x}/{y}?token={token}'
+        else:
+            tile_url = f'https://earthengine.googleapis.com/map/{mapid}/{z}/{x}/{y}'
+        print(f"Fetching tile from URL: {tile_url}")  # Log the tile URL
+        tile_response = requests.get(tile_url)
+        if tile_response.status_code == 200:
+            return Response(tile_response.content, content_type='image/png')
+        else:
+            print(f"Failed to fetch tile: {tile_response.status_code}")  # Log any errors
+            return Response(status=tile_response.status_code)
+        
     @app.route('/schedule', methods=['POST'])
     @login_required
     def schedule_notification():
