@@ -14,12 +14,13 @@ import os
 import ee
 import authentication
 import sqlite3
-
+import openai
 
 # Initialize the database and scheduler
 db = SQLAlchemy()
 scheduler = APScheduler()
 load_dotenv()
+OPENAI_API_KEY = os.getenv('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')
 mail = Mail()
 
 # Initialize Google Earth Engine with Service Account Credentials
@@ -80,6 +81,32 @@ def create_app():
     def dashboard():
         return jsonify({"message": "Welcome to the dashboard!"})
 
+    # GPT API route
+    # GPT API route
+    @app.route('/gpt', methods=['POST'])
+    def gpt_query():
+        try:
+            # Extract the user's prompt from the POST request
+            user_prompt = request.form['prompt']
+
+            # Call the GPT Assistant API using ChatCompletion
+            response = openai.ChatCompletion.create(
+                model="asst_qpTtM3Yyf4urgskeIXk50tYy",  # Assistant ID
+                messages=[
+                    {"role": "system", "content": "You are an assistant."},
+                    {"role": "user", "content": user_prompt},
+                ],
+                max_tokens=1000
+            )
+
+            # Extract the response text from the assistant
+            gpt_response = response['choices'][0]['message']['content'].strip()
+
+            return jsonify({"response": gpt_response}), 200
+
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
     @app.route('/search', methods=['POST'])
     def search():
         latitude = float(request.form['latitude'])
@@ -104,18 +131,14 @@ def create_app():
         point = ee.Geometry.Point([longitude, latitude])
 
 
-        # Filter the Landsat 9 image collection
-        # collection = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
-        #     .filterDate(start_date, end_date) \
-        #     .filterBounds(point) \
-        #     .filter(ee.Filter.lt('CLOUD_COVER', cloud_coverage))
+
         landsat_sr = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
                 .filterBounds(point) \
                 .filterDate(start_date, end_date) \
                 .filter(ee.Filter.lt('CLOUD_COVER', 10))
 
         # Get the first image from the collection
-        # image = collection.first()
+
         image = landsat_sr.first()
         # Check if an image exists
         if image.getInfo() is None:
@@ -133,57 +156,119 @@ def create_app():
             'selectedPixel': selected_pixel,
             'surroundingPixels': neighborhood_values
         })
-    
-        
 
-    @app.route('/api/get-landsat-data', methods=['POST'])
-    def get_landsat_data():
+    @app.route('/gpt-satellite-query', methods=['POST'])
+    def gpt_satellite_query():
+        try:
+            query_type = request.form['query_type']
+            user_prompt = request.form['prompt']
 
-        # Access JSON data from the request
-        # data = request.json
+            # If the query is about overpass, integrate overpass data into the GPT response
+            if query_type == "overpass":
+                latitude = float(request.form['latitude'])
+                longitude = float(request.form['longitude'])
+                date = request.form['date']
 
-        # latitude = float(data['latitude'])
-        # longitude = float(data['longitude'])
-        # start_date = data['startDate']
-        # end_date = data['endDate']
-        # cloud_coverage = float(data['cloudCoverage'])
+                # Fetch overpass data
+                overpasses = get_landsat_overpasses(latitude, longitude, date)
 
-        # Create a point geometry
-        # point = ee.Geometry.Point([longitude, latitude])
-        lat = 45.4215
-        lon = -75.6972
-        point = ee.Geometry.Point([lon, lat])
+                if not overpasses['overpasses']:
+                    gpt_prompt = f"{user_prompt}\nNo overpasses found for the given location and date."
+                else:
+                    pass_time = overpasses['overpasses'][0]['overpass_time']
+                    gpt_prompt = f"{user_prompt}\nThe next overpass is at {pass_time} UTC."
 
+                # Call GPT with augmented prompt
+                response = openai.Completion.create(
+                    engine="text-davinci-003",
+                    prompt=gpt_prompt,
+                    max_tokens=150
+                )
 
-        # Filter the Landsat 9 image collection
-        # collection = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
-        #     .filterDate(start_date, end_date) \
-        #     .filterBounds(point) \
-        #     .filter(ee.Filter.lt('CLOUD_COVER', cloud_coverage))
-        landsat_sr = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
-                .filterBounds(point) \
-                .filterDate('2023-01-01', '2023-12-31') \
-                .filter(ee.Filter.lt('CLOUD_COVER', 10))
+                gpt_response = response.choices[0].text.strip()
+                return jsonify({"response": gpt_response}), 200
 
-        # Get the first image from the collection
-        # image = collection.first()
-        image = landsat_sr.first()
-        # Check if an image exists
-        if image.getInfo() is None:
-            return jsonify({'error': 'No images found for the given parameters.'}), 404
+            # Handle other query types (e.g., surface reflectance data)
+            elif query_type == "data":
+                latitude = float(request.form['latitude'])
+                longitude = float(request.form['longitude'])
+                start_date = request.form['start_date']
+                end_date = request.form['end_date']
 
-        # Get the pixel value at the point
-        selected_pixel = image.sample(point, scale=30).first().toDictionary().getInfo()
+                # Get surface reflectance data
+                point = ee.Geometry.Point([longitude, latitude])
+                landsat_sr = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
+                    .filterBounds(point) \
+                    .filterDate(start_date, end_date) \
+                    .filter(ee.Filter.lt('CLOUD_COVER', 10))
 
-        # Get surrounding pixels (e.g., a 3x3 window around the point)
-        neighborhood = image.neighborhoodToArray(ee.Kernel.square(1))
-        neighborhood_values = neighborhood.sample(point, scale=30).first().toDictionary().getInfo()
+                image = landsat_sr.first()
 
-        # Return the pixel data
-        return jsonify({
-            'selectedPixel': selected_pixel,
-            'surroundingPixels': neighborhood_values
-        })
+                if image.getInfo() is None:
+                    return jsonify({'error': 'No images found for the given parameters.'}), 404
+
+                selected_pixel = image.sample(point, scale=30).first().toDictionary().getInfo()
+                gpt_prompt = f"{user_prompt}\nThe surface reflectance for your point is {selected_pixel}"
+
+                # Call GPT with augmented prompt
+                response = openai.Completion.create(
+                    engine="text-davinci-003",
+                    prompt=gpt_prompt,
+                    max_tokens=150
+                )
+
+                gpt_response = response.choices[0].text.strip()
+                return jsonify({"response": gpt_response}), 200
+
+            else:
+                return jsonify({'error': 'Invalid query type.'}), 400
+
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    # @app.route('/api/get-landsat-data', methods=['POST'])
+    # def get_landsat_data():
+    #
+    #     # Access JSON data from the request
+    #     # data = request.json
+    #
+    #     # latitude = float(data['latitude'])
+    #     # longitude = float(data['longitude'])
+    #     # start_date = data['startDate']
+    #     # end_date = data['endDate']
+    #     # cloud_coverage = float(data['cloudCoverage'])
+    #
+    #     # Create a point geometry
+    #     # point = ee.Geometry.Point([longitude, latitude])
+    #     lat = 45.4215
+    #     lon = -75.6972
+    #     point = ee.Geometry.Point([lon, lat])
+    #
+    #
+    #
+    #     landsat_sr = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
+    #             .filterBounds(point) \
+    #             .filterDate('2023-01-01', '2023-12-31') \
+    #             .filter(ee.Filter.lt('CLOUD_COVER', 10))
+    #
+    #
+    #     image = landsat_sr.first()
+    #
+    #     if image.getInfo() is None:
+    #         return jsonify({'error': 'No images found for the given parameters.'}), 404
+    #
+    #     # Get the pixel value at the point
+    #     selected_pixel = image.sample(point, scale=30).first().toDictionary().getInfo()
+    #
+    #     # Get surrounding pixels (e.g., a 3x3 window around the point)
+    #     neighborhood = image.neighborhoodToArray(ee.Kernel.square(1))
+    #     neighborhood_values = neighborhood.sample(point, scale=30).first().toDictionary().getInfo()
+    #
+    #     # Return the pixel data
+    #     return jsonify({
+    #         'selectedPixel': selected_pixel,
+    #         'surroundingPixels': neighborhood_values
+    #     })
 
     @app.route('/schedule', methods=['POST'])
     @login_required
