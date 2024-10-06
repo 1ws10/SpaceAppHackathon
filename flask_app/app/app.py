@@ -17,12 +17,67 @@ import os
 import base64
 import io
 import requests
+import zipfile
+import numpy as np
+import rasterio
+import imageio
+import platform
+import sys
+
+
+if platform.system() == "Windows":
+    sys.modules['fcntl'] = None
+
+# USGS API Configuration
+USGS_API_URL = 'https://m2m.cr.usgs.gov/api/api/json/stable/'
+USGS_APPLICATION_TOKEN = "tu_xRq09xzv1XhYeUEhoyvz7KgoEC!aB@3L@ay3V8kXD3qHa6_fGfkqnNtKsHc7I"
+
 
 # Initialize the database and scheduler
 db = SQLAlchemy()
 scheduler = APScheduler()
 load_dotenv()
 mail = Mail()
+def extract_and_process(zip_file_path):
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        zip_ref.extractall('tmp/extracted')
+
+    # Find the relevant bands
+    band_paths = {
+        'red': None,
+        'green': None,
+        'blue': None
+    }
+
+    for root, dirs, files in os.walk('tmp/extracted'):
+        for file in files:
+            if file.endswith('_SR_B4.TIF'):
+                band_paths['red'] = os.path.join(root, file)
+            elif file.endswith('_SR_B3.TIF'):
+                band_paths['green'] = os.path.join(root, file)
+            elif file.endswith('_SR_B2.TIF'):
+                band_paths['blue'] = os.path.join(root, file)
+
+    if None in band_paths.values():
+        raise Exception('Required bands not found in the downloaded data.')
+
+    # Read and stack the bands
+    red = rasterio.open(band_paths['red']).read(1)
+    green = rasterio.open(band_paths['green']).read(1)
+    blue = rasterio.open(band_paths['blue']).read(1)
+
+    rgb = np.dstack((red, green, blue))
+
+    # Normalize the data
+    rgb = np.clip(rgb, 0, 10000)  # Landsat data ranges from 0 to 10000
+    rgb = (rgb / 10000) * 255
+    rgb = rgb.astype(np.uint8)
+
+    # Save the image
+    output_path = 'static/output_image.jpg'
+    imageio.imwrite(output_path, rgb)
+
+    return output_path
 
 # Initialize Google Earth Engine with Service Account Credentials
 def init_earth_engine():
@@ -35,6 +90,91 @@ def init_earth_engine():
     except Exception as e:
         print(f"Failed to initialize Google Earth Engine: {e}")
 
+
+def usgs_login():
+    payload = {
+        'username': "rubiojack123@gmail.com",
+        'applicationToken': USGS_APPLICATION_TOKEN
+    }
+    response = requests.post(f'{USGS_API_URL}login', json=payload)
+    result = response.json()
+    if result.get('errorCode'):
+        raise Exception(f"USGS Login Error: {result['errorMessage']}")
+    return result['data']
+
+def usgs_logout(api_key):
+    payload = {'apiKey': api_key}
+    requests.post(f'{USGS_API_URL}logout', json=payload)
+
+
+def search_landsat(api_key, latitude, longitude, start_date, end_date, cloud_coverage):
+    payload = {
+        'apiKey': api_key,
+        'datasetName': 'LANDSAT_9_C2_L2',
+        'spatialFilter': {
+            'filterType': 'mbr',
+            'lowerLeft': {'latitude': latitude - 0.1, 'longitude': longitude - 0.1},
+            'upperRight': {'latitude': latitude + 0.1, 'longitude': longitude + 0.1},
+        },
+        'temporalFilter': {
+            'startDate': start_date,
+            'endDate': end_date,
+        },
+        'additionalCriteria': {
+            'filterType': 'and',
+            'childFilters': [
+                {
+                    'filterType': 'value',
+                    'fieldId': 20557,  # CLOUD_COVER
+                    'value': cloud_coverage,
+                    'operand': '<=',
+                },
+            ],
+        },
+        'maxResults': 1,
+        'startingNumber': 1,
+        'sortOrder': 'ASC',
+    }
+    response = requests.post(f'{USGS_API_URL}scene-search', json=payload)
+    result = response.json()
+    if result['errorCode']:
+        raise Exception(f"USGS Search Error: {result['errorMessage']}")
+    return result['data']['results']
+
+def download_landsat_data(api_key, entity_id, product_id):
+    payload = {
+        'apiKey': api_key,
+        'datasetName': 'LANDSAT_9_C2_L2',
+        'entityIds': [entity_id],
+        'products': ['STANDARD']
+    }
+    response = requests.post(f'{USGS_API_URL}download-request', json=payload)
+    result = response.json()
+    if result['errorCode']:
+        raise Exception(f"USGS Download Error: {result['errorMessage']}")
+    download_url = result['data'][0]['url']
+    return download_url
+
+def process_landsat_image(file_path):
+    # Open the bands you need (e.g., Red, Green, Blue)
+    with rasterio.open(file_path) as src:
+        # Read RGB bands (assuming bands 4, 3, 2 correspond to RGB)
+        red = src.read(4)
+        green = src.read(3)
+        blue = src.read(2)
+
+        # Stack bands
+        rgb = np.dstack((red, green, blue))
+
+        # Normalize and convert to uint8
+        rgb = (rgb / rgb.max()) * 255
+        rgb = rgb.astype(np.uint8)
+
+        # Save as JPEG
+        output_path = 'static/output_image.jpg'
+        imageio.imwrite(output_path, rgb)
+
+    return output_path
 
 
 def create_app():
@@ -94,56 +234,53 @@ def create_app():
         # Return the overpass metadata as JSON
         return jsonify(overpasses)
     
+    # Update your route
     @app.route('/api/get-landsat-data', methods=['POST'])
     def get_landsat_data():
-        # data = request.json
+        data = request.json
 
-        # latitude = float(data['latitude'])
-        # longitude = float(data['longitude'])
-        start_date = '2023-01-01' # data['startDate']
-        end_date = '2023-12-31'# data['endDate']
-        cloud_coverage = 10 # float(data['cloudCoverage'])
+        latitude = float(data['latitude'])
+        longitude = float(data['longitude'])
+        start_date = data['startDate']
+        end_date = data['endDate']
+        cloud_coverage = float(data['cloudCoverage'])
+        api_key = None
+        try:
+            # Authenticate
+            api_key = usgs_login()
 
-        # point = ee.Geometry.Point([longitude, latitude])
-        
-        # collection = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
-        #     .filterDate(start_date, end_date) \
-        #     .filterBounds(point) \
-        #     .filter(ee.Filter.lt('CLOUD_COVER', cloud_coverage))
+            # Search for scenes
+            scenes = search_landsat(api_key, latitude, longitude, start_date, end_date, cloud_coverage)
+            if not scenes:
+                return jsonify({'error': 'No images found for the given parameters.'}), 404
 
-        # 
+            # Get the first scene
+            scene = scenes[0]
+            entity_id = scene['entityId']
+            product_id = scene['displayId']
 
-        # Define the location
-        latitude = 45.4215
-        longitude = -75.6972
-        point = ee.Geometry.Point([longitude, latitude])
+            # Request download URL
+            download_url = download_landsat_data(api_key, entity_id, product_id)
 
-        # Load Landsat 9 Surface Reflectance Image Collection
-        collection = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
-                        .filterBounds(point) \
-                        .filterDate(start_date, end_date) \
-                        .filter(ee.Filter.lt('CLOUD_COVER', cloud_coverage))
-        
-        image = collection.first()
+            # Download the data
+            response = requests.get(download_url)
+            zip_file_path = f'tmp/{entity_id}.zip'
+            with open(zip_file_path, 'wb') as f:
+                f.write(response.content)
 
-        if image.getInfo() is None:
-            return jsonify({'error': 'No images found for the given parameters.'}), 404
+            # Extract and process the image After downloading the ZIP file
+            image_url = extract_and_process(zip_file_path)
 
-        vis_params = {
-            'bands': ['SR_B4', 'SR_B3', 'SR_B2'],
-            'min': 0,
-            'max': 3000,
-        }
-
-        map_dict = image.getMapId(vis_params)
-
-        return jsonify({
-            'mapid': map_dict['mapid'],
-            'token': map_dict['token'],
-            'latitude': latitude,
-            'longitude': longitude
-        })
-
+            return jsonify({
+                'image_url': image_url,
+                'latitude': latitude,
+                'longitude': longitude
+            })
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if api_key is not None:
+                usgs_logout(api_key)
     
     @app.route('/tiles/<path:mapid>/<int:z>/<int:x>/<int:y>.png')
     def get_tile(mapid, z, x, y):

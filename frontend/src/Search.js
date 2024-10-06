@@ -30,11 +30,17 @@ const Search = () => {
   const handleNavigate = () => {
     navigate('/data-display', {
       state: {
-        latitude: parseFloat(latitude),
-        longitude: parseFloat(longitude),
-        startDate,
-        endDate,
-        cloudCoverage: parseInt(cloudCoverage),
+        latitude: parseFloat(45.4215),
+        longitude: parseFloat(-75.6972),
+        startDate: '2023-01-01',
+        endDate: '2023-12-31',
+        cloudCoverage: parseInt(10),
+
+        // latitude: parseFloat(latitude),
+        // longitude: parseFloat(longitude),
+        // startDate,
+        // endDate,
+        // cloudCoverage: parseInt(cloudCoverage),
       },
     });
   };
