@@ -94,19 +94,13 @@ def create_app():
     
     @app.route('/search-data', methods=['POST'])
     def search_data():
-        # Extract query parameters
-        latitude = request.args.get('latitude', type=float)
-        longitude = request.args.get('longitude', type=float)
-        start_date = request.args.get('startDate')
-        end_date = request.args.get('endDate')
-        cloud_coverage = request.args.get('cloudCoverage', type=int)
-
-        # Print the query parameters
-        print(f"Latitude: {latitude}")
-        print(f"Longitude: {longitude}")
-        print(f"Start Date: {start_date}")
-        print(f"End Date: {end_date}")
-        print(f"Cloud Coverage: {cloud_coverage}")
+        # Extract body data from the request
+        data = request.json
+        latitude = float(data['latitude'])
+        longitude = float(data['longitude'])
+        start_date = data['startDate']
+        end_date = data['endDate']
+        cloud_coverage = float(data['cloudCoverage'])
 
         point = ee.Geometry.Point([longitude, latitude])
 
