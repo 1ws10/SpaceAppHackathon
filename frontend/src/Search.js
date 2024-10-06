@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
-import { Row, Form, Container, Button } from 'react-bootstrap';
+import { Col, Row, Form, Container, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const Search = () => {
@@ -38,9 +38,32 @@ const Search = () => {
       },
     });
   };
+  // Handler to navigate to DataDisplay with the selected data as query parameters
+const handleNavigateSearch = () => {
+  const params = new URLSearchParams({
+    latitude: parseFloat(latitude),
+    longitude: parseFloat(longitude),
+    startDate,
+    endDate,
+    cloudCoverage: parseInt(cloudCoverage),
+  }).toString();
+
+  navigate(`/search-data?${params}`);
+};
 
   return (
     <div>
+      <Container className="mt-4">
+        <Row>
+          <Col>
+            <div className="bubble-header">
+              <h1 >Welcome to Landsat Data Viewer</h1>
+              <h3>A SpaceApps Challenge Project</h3>
+            </div>
+          </Col>
+        </Row>
+      </Container>
+      <Container className="mt-4">
       <MapContainer center={position} zoom={2} style={{ height: '400px', width: '100%' }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -55,6 +78,7 @@ const Search = () => {
         )}
         <MapClickHandler />
       </MapContainer>
+      </Container>
       <div className="mt-3">
         <Form>
           <Form.Group controlId="latitude">
@@ -76,8 +100,9 @@ const Search = () => {
             />
           </Form.Group>
           <Form.Group controlId="dateRange">
-            <Form.Label>Date Range</Form.Label>
             <Row>
+              <Col>
+              Starting Date
               <Form.Group as={Form.Col} controlId="startDate">
                 <Form.Control
                   type="date"
@@ -85,6 +110,9 @@ const Search = () => {
                   onChange={(e) => setStartDate(e.target.value)}
                 />
               </Form.Group>
+              </Col>
+              <Col>
+              Ending Date
               <Form.Group as={Form.Col} controlId="endDate">
                 <Form.Control
                   type="date"
@@ -92,10 +120,11 @@ const Search = () => {
                   onChange={(e) => setEndDate(e.target.value)}
                 />
               </Form.Group>
+              </Col>
             </Row>
           </Form.Group>
           <Form.Group controlId="cloudCoverage">
-            <Form.Label>Cloud Coverage (%)</Form.Label>
+            <Form.Label>Omit Data Where Cloud Coverage is Greater than (%)</Form.Label>
             <Form.Control
               type="range"
               min="0"
@@ -108,7 +137,7 @@ const Search = () => {
         </Form>
       </div>
       {/* Button to trigger navigation */}
-      <Button className="mt-3" onClick={handleNavigate}>
+      <Button className="mt-3" onClick={handleNavigateSearch}>
         View Landsat Data
       </Button>
     </div>

@@ -1,0 +1,16 @@
+.bubble-header {
+    background-color: #f8f9fa; /* Light background */
+    border: 2px solid #a2b0be; /* Bubble-like border color */
+    border-radius: 50px; /* Rounded corners for the bubble effect */
+    padding: 10px 20px; /* Padding inside the bubble */
+    text-align: center; /* Center align the text */
+    box-shadow: 0 8px 15px rgba(0, 123, 255, 0.2); /* Slight shadow for a floating bubble effect */
+  }
+  
+  .header-title {
+    font-family: 'Arial', sans-serif; /* Choose a clean font */
+    font-size: 2rem; /* Large font for the header */
+    color: #192028; /* Text color matching the border */
+    margin: 0; /* Remove default margin */
+  }
+  
