@@ -1,6 +1,6 @@
 import sqlite3
 
-db = sqlite3.connect('flask/Database/database.db')
+db = sqlite3.connect('flask_app/app/database.db')
 cursor = db.cursor()
 
 def createUser(email: str, password: str, phone = None):
@@ -41,7 +41,8 @@ def getData(userID):
     else:
         return None
 
+# Testing
 # createData(3, 63.12323, 85.123123, "2024-10-6", "2024-10-6")
 # db.close()
 
-print(getData(3))
+# print(getData(3))
