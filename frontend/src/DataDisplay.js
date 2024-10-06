@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import WavelengthChart from "./chart";
 
 const DataDisplay = () => {
   const location = useLocation();
@@ -70,6 +71,10 @@ const DataDisplay = () => {
         <h3>Surrounding Pixels Data:</h3>
         <pre>{JSON.stringify(pixelData.surroundingPixels, null, 2)}</pre>
       </div>
+      <div className="chart-container">
+        <h3>Wavelength Reflectance Chart</h3>
+        <WavelengthChart />
+      </div>  
       {/* Email Popup Modal */}
       {showPopup && (
         <div className="modal show d-block" tabIndex="-1" role="dialog">
