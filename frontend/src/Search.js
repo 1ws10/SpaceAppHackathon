@@ -23,7 +23,8 @@ const Search = () => {
   const [marker, setMarker] = useState(null);
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
-  const [startDate, setStartDate] = useState(dayjs());
+  // september 27 2021 by default
+  const [startDate, setStartDate] = useState(dayjs("2021-09-27"));
   const [endDate, setEndDate] = useState(dayjs());
   const [cloudCoverage, setCloudCoverage] = useState(10);
 

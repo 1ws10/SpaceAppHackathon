@@ -52,7 +52,7 @@ def create_app():
 
     # Initialize the scheduler
     scheduler.init_app(app)
-    
+
     # Flask API Routes
     @app.route('/login', methods=['POST'])
     def login():
@@ -73,7 +73,7 @@ def create_app():
         except sqlite3.IntegrityError as e:
             return jsonify({"message: User registration unsuccessful"}, 401)
         return
-        
+
 
     @app.route('/dashboard')
     @login_required
@@ -91,7 +91,7 @@ def create_app():
 
         # Return the overpass metadata as JSON
         return jsonify(overpasses)
-    
+
     @app.route('/search-data', methods=['POST'])
     def search_data():
         # Extract body data from the request
@@ -134,8 +134,8 @@ def create_app():
             'selectedPixel': selected_pixel,
             'surroundingPixels': neighborhood_values
         })
-    
-        
+
+
 
     @app.route('/api/get-landsat-data', methods=['POST'])
     def get_landsat_data():
