@@ -90,6 +90,50 @@ def create_app():
         # Return the overpass metadata as JSON
         return jsonify(overpasses)
     
+    @app.route('/search-data', methods=['GET'])
+    def search_data():
+        # Extract query parameters
+        latitude = request.args.get('latitude', type=float)
+        longitude = request.args.get('longitude', type=float)
+        start_date = request.args.get('startDate')
+        end_date = request.args.get('endDate')
+        cloud_coverage = request.args.get('cloudCoverage', type=int)
+
+        point = ee.Geometry.Point([longitude, latitude])
+
+
+        # Filter the Landsat 9 image collection
+        # collection = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
+        #     .filterDate(start_date, end_date) \
+        #     .filterBounds(point) \
+        #     .filter(ee.Filter.lt('CLOUD_COVER', cloud_coverage))
+        landsat_sr = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
+                .filterBounds(point) \
+                .filterDate(start_date, end_date) \
+                .filter(ee.Filter.lt('CLOUD_COVER', 10))
+
+        # Get the first image from the collection
+        # image = collection.first()
+        image = landsat_sr.first()
+        # Check if an image exists
+        if image.getInfo() is None:
+            return jsonify({'error': 'No images found for the given parameters.'}), 404
+
+        # Get the pixel value at the point
+        selected_pixel = image.sample(point, scale=30).first().toDictionary().getInfo()
+
+        # Get surrounding pixels (e.g., a 3x3 window around the point)
+        neighborhood = image.neighborhoodToArray(ee.Kernel.square(1))
+        neighborhood_values = neighborhood.sample(point, scale=30).first().toDictionary().getInfo()
+
+        # Return the pixel data
+        return jsonify({
+            'selectedPixel': selected_pixel,
+            'surroundingPixels': neighborhood_values
+        })
+    
+        
+
     @app.route('/api/get-landsat-data', methods=['POST'])
     def get_landsat_data():
 
