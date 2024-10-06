@@ -1,44 +1,22 @@
-import React from 'react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import React from "react";
+// import { Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { LineChart } from "@mui/x-charts/LineChart";
 
-//dummy data
-const data = [
-  { wavelength: 400, reflectance: 0.1 },
-  { wavelength: 450, reflectance: 0.12 },
-  { wavelength: 500, reflectance: 0.15 },
-  { wavelength: 550, reflectance: 0.2 },
-  { wavelength: 600, reflectance: 0.1 },
-  { wavelength: 650, reflectance: 0.5 },
-  { wavelength: 700, reflectance: 0.6 },
-  { wavelength: 750, reflectance: 0.65 },
-  { wavelength: 800, reflectance: 0.5 },
-  { wavelength: 850, reflectance: 0.55 },
-  { wavelength: 900, reflectance: 0.6 },
-  { wavelength: 950, reflectance: 0.65 },
-];
-
-const WavelengthChart = () => {
+export default function WavelengthChart({ graphData }) {
   return (
-    <ResponsiveContainer width="100%" height={400}>
-      <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="wavelength" label={{ value: 'Wavelength (nm)', position: 'bottom' }} />
-        <YAxis label={{ value: 'Reflectance', angle: -90, position: 'insideLeft' }} />
-        <Tooltip />
-        <Legend />
-        <Line type="monotone" dataKey="reflectance" stroke="#FFA500" dot={true} />
-      </LineChart>
-    </ResponsiveContainer>
+    <LineChart
+      height={600}
+      xAxis={[{ dataKey: "wavelength", valueFormatter: (value) => `${value} nm` }]}
+      yAxis={[{ dataKey: "reflectance", min: 0 }]}
+      dataset={graphData}
+      className="p-8"
+      series={[
+        {
+          dataKey: "reflectance",
+          label: "Reflectance",
+          color: "#8884d8",
+        },
+      ]}
+    />
   );
-};
-
-export default WavelengthChart;
+}
