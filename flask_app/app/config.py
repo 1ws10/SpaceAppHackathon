@@ -1,10 +1,18 @@
 import os
 
 class Config:
-    EMAIL_ADDRESS = os.getenv('EMAIL_ADDRESS', "your_email@example.com")
-    EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD', "your_password")
-    SMTP_SERVER = os.getenv('SMTP_SERVER', "smtp.example.com")
-    SMTP_PORT = os.getenv('SMTP_PORT', 587)
+    # EMAIL_ADDRESS = os.getenv('EMAIL_ADDRESS', "spaceapp2024@gmail.com")
+    # EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD', "MyPassword123")
+    # SMTP_SERVER = os.getenv('SMTP_SERVER', "smtp.gmail.com")
+    # SMTP_PORT = os.getenv('SMTP_PORT', 587)
+    
+    # MAIL_SERVER = SMTP_SERVER
+    # MAIL_PORT = SMTP_PORT
+    # MAIL_USE_TLS = True  # Assuming you're using TLS
+    # MAIL_USE_SSL = False  # Disable SSL if using TLS
+    # MAIL_USERNAME = EMAIL_ADDRESS
+    # MAIL_PASSWORD = EMAIL_PASSWORD
+    # MAIL_DEFAULT_SENDER = EMAIL_ADDRESS
 
     # Twilio settings (if needed)
     TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
