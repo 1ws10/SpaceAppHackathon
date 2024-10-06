@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Container, Form, Button, Alert } from 'react-bootstrap';
 
 const Login = ({ setToken }) => {
   const [username, setUsername] = useState('');
@@ -20,33 +19,33 @@ const Login = ({ setToken }) => {
   };
 
   return (
-    <Container className="mt-5">
+    <section className="mt-5">
       <h2>Login</h2>
       {error && <Alert variant="danger">{error}</Alert>}
-      <Form onSubmit={handleSubmit}>
-        <Form.Group controlId="formBasicUsername">
-          <Form.Label>Username</Form.Label>
-          <Form.Control
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Username</label>
+          <input
             type="text"
             placeholder="Enter username"
             onChange={(e) => setUsername(e.target.value)}
             required
           />
-        </Form.Group>
-        <Form.Group controlId="formBasicPassword">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
+        </div>
+        <div>
+          <label>Password</label>
+          <input
             type="password"
             placeholder="Password"
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-        </Form.Group>
-        <Button variant="primary" type="submit">
+        </div>
+        <button type="submit">
           Login
-        </Button>
-      </Form>
-    </Container>
+        </button>
+      </form>
+    </section>
   );
 };
 

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import WavelengthChart from "./chart";
+import sampleOutput from "./testing/sampleOutput";
+import { useParams } from "react-router-dom";
 
 const DataDisplay = () => {
   const location = useLocation();
@@ -9,12 +11,12 @@ const DataDisplay = () => {
   const [showPopup, setShowPopup] = useState(true); // For showing the email popup
   const [email, setEmail] = useState(""); // For storing email input
 
+  const { latitude, longitude, startDate, endDate, cloudCoverage } = useParams();
+
   useEffect(() => {
-    const { latitude, longitude, startDate, endDate, cloudCoverage } = location.state;
-  
     const fetchPixelData = async () => {
       try {
-        const response = await fetch('/api/get-landsat-data', {
+        const response = await fetch('/search-data', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -27,7 +29,7 @@ const DataDisplay = () => {
             cloudCoverage,
           }),
         });
-  
+
         const data = await response.json();
         if (response.ok) {
           setPixelData(data);
@@ -38,8 +40,9 @@ const DataDisplay = () => {
       } catch (err) {
         setError('Failed to fetch data from the server.');
       }
+      // setPixelData(sampleOutput); // Use sample data for testing
     };
-  
+
     fetchPixelData();
   }, [location.state]);
 
@@ -74,7 +77,7 @@ const DataDisplay = () => {
       <div className="chart-container">
         <h3>Wavelength Reflectance Chart</h3>
         <WavelengthChart />
-      </div>  
+      </div>
       {/* Email Popup Modal */}
       {showPopup && (
         <div className="modal show d-block" tabIndex="-1" role="dialog">
@@ -87,13 +90,7 @@ const DataDisplay = () => {
                 </button>
               </div>
               <div className="modal-body">
-                <input
-                  type="email"
-                  className="form-control"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                />
+                <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" />
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-primary" onClick={handleSubmit}>
