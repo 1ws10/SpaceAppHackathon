@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import WavelengthChart from "./chart";
 import sampleOutput from "./testing/sampleOutput";
-import { useParams } from "react-router-dom";
 
 const DataDisplay = () => {
   const location = useLocation();
@@ -12,7 +11,12 @@ const DataDisplay = () => {
   const [showPopup, setShowPopup] = useState(true); // For showing the email popup
   const [email, setEmail] = useState(""); // For storing email input
 
-  const { latitude, longitude, startDate, endDate, cloudCoverage } = useParams();
+  const params = new URLSearchParams(location.search);
+  const latitude = params.get("latitude");
+  const longitude = params.get("longitude");
+  const startDate = params.get("startDate");
+  const endDate = params.get("endDate");
+  const cloudCoverage = params.get("cloudCoverage");
 
   const wavelengths = {
     SR_B1: 443,
