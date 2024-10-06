@@ -26,42 +26,43 @@ const DataDisplay = () => {
 
   useEffect(() => {
     const fetchPixelData = async () => {
-      // try {
-      //   const response = await fetch('/search-data', {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: JSON.stringify({
-      //       latitude,
-      //       longitude,
-      //       startDate,
-      //       endDate,
-      //       cloudCoverage,
-      //     }),
-      //   });
-
-      //   const data = await response.json();
-      //   if (response.ok) {
-      //     setPixelData(data);
-      //     console.log('Received data:', data); // Log the received data
-      //   } else {
-      //     setError(data.error || 'An error occurred while fetching data.');
-      //   }
-      // } catch (err) {
-      //   setError('Failed to fetch data from the server.');
-      // }
-      setPixelData(sampleOutput); // Use sample data for testing
-      const graphData = Object.keys(sampleOutput.selectedPixel)
-        .filter((key) => wavelengths[key]) // Filter out keys without corresponding wavelengths
-        .map((key) => {
-          return {
-        wavelength: wavelengths[key],
-        reflectance: sampleOutput.selectedPixel[key] / 100000,
-          };
+      try {
+        const response = await fetch("/search-data", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            latitude,
+            longitude,
+            startDate,
+            endDate,
+            cloudCoverage,
+          }),
         });
-      setGraphData(graphData);
-      console.log("Graph data:", graphData);
+
+        const data = await response.json();
+        if (response.ok) {
+          setPixelData(data);
+          console.log("Received data:", data); // Log the received data
+          const graphData = Object.keys(sampleOutput.selectedPixel)
+            .filter((key) => wavelengths[key]) // Filter out keys without corresponding wavelengths
+            .map((key) => {
+              return {
+                wavelength: wavelengths[key],
+                reflectance: sampleOutput.selectedPixel[key] / 100000,
+              };
+            });
+          setGraphData(graphData);
+          console.log("Graph data:", graphData);
+        } else {
+          setError(data.error || "An error occurred while fetching data.");
+        }
+      } catch (err) {
+        setError("Failed to fetch data from the server.");
+        console.error(err);
+      }
+      // setPixelData(sampleOutput); // Use sample data for testing
     };
 
     fetchPixelData();

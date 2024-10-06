@@ -92,7 +92,7 @@ def create_app():
         # Return the overpass metadata as JSON
         return jsonify(overpasses)
     
-    @app.route('/search-data', methods=['GET'])
+    @app.route('/search-data', methods=['POST'])
     def search_data():
         # Extract query parameters
         latitude = request.args.get('latitude', type=float)
@@ -100,6 +100,13 @@ def create_app():
         start_date = request.args.get('startDate')
         end_date = request.args.get('endDate')
         cloud_coverage = request.args.get('cloudCoverage', type=int)
+
+        # Print the query parameters
+        print(f"Latitude: {latitude}")
+        print(f"Longitude: {longitude}")
+        print(f"Start Date: {start_date}")
+        print(f"End Date: {end_date}")
+        print(f"Cloud Coverage: {cloud_coverage}")
 
         point = ee.Geometry.Point([longitude, latitude])
 
