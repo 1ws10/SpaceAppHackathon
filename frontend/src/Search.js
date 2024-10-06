@@ -102,6 +102,8 @@ const Search = () => {
 
       <div className="mt-3">
         <Form>
+          <Row>
+            <Col>
           <Form.Group controlId="latitude">
             <Form.Label>Latitude</Form.Label>
             <Form.Control
@@ -111,6 +113,8 @@ const Search = () => {
               placeholder="Enter Latitude"
             />
           </Form.Group>
+          </Col>
+          <Col>
           <Form.Group controlId="longitude">
             <Form.Label>Longitude</Form.Label>
             <Form.Control
@@ -120,6 +124,8 @@ const Search = () => {
               placeholder="Enter Longitude"
             />
           </Form.Group>
+          </Col>
+          </Row>
           <Form.Group controlId="dateRange">
             <Row>
               <Col>
