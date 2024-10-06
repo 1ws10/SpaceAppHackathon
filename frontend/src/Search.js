@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import { Col, Row, Form, Container, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
+import InteractiveGlobe from './InteractiveGlobe';
 
 const Search = () => {
+  const [selectedCoordinates, setSelectedCoordinates] = useState(null);
+  const [isGlobe, setIsGlobe] = useState(true); // Toggle between Globe and Map
   const [position, setPosition] = useState([0, 0]); // Default position (0, 0)
   const [marker, setMarker] = useState(null);
   const [latitude, setLatitude] = useState('');
@@ -12,44 +15,43 @@ const Search = () => {
   const [endDate, setEndDate] = useState('');
   const [cloudCoverage, setCloudCoverage] = useState(0);
 
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   const MapClickHandler = () => {
     useMapEvents({
       click(e) {
-        setPosition([e.latlng.lat, e.latlng.lng]);
-        setMarker([e.latlng.lat, e.latlng.lng]);
-        setLatitude(e.latlng.lat);
-        setLongitude(e.latlng.lng);
+        const { lat, lng } = e.latlng;
+        setPosition([lat, lng]);
+        setMarker([lat, lng]);
+        setLatitude(lat); // Update latitude state
+        setLongitude(lng); // Update longitude state
+        setSelectedCoordinates({ lat, lng }); // Update selected coordinates for later use
       },
     });
     return null;
   };
 
-  // Handler to navigate to DataDisplay with the selected data
-  const handleNavigate = () => {
-    navigate('/data-display', {
-      state: {
-        latitude: parseFloat(latitude),
-        longitude: parseFloat(longitude),
-        startDate,
-        endDate,
-        cloudCoverage: parseInt(cloudCoverage),
-      },
-    });
+  const handleCoordinatesSelection = (lat, lng) => {
+    setLatitude(lat);
+    setLongitude(lng);
+    setSelectedCoordinates({ lat, lng });
   };
-  // Handler to navigate to DataDisplay with the selected data as query parameters
-const handleNavigateSearch = () => {
-  const params = new URLSearchParams({
-    latitude: parseFloat(latitude),
-    longitude: parseFloat(longitude),
-    startDate,
-    endDate,
-    cloudCoverage: parseInt(cloudCoverage),
-  }).toString();
 
-  navigate(`/search-data?${params}`);
-};
+  const handleNavigateSearch = () => {
+    const params = new URLSearchParams({
+      latitude: parseFloat(latitude),
+      longitude: parseFloat(longitude),
+      startDate,
+      endDate,
+      cloudCoverage: parseInt(cloudCoverage),
+    }).toString();
+    navigate(`/search-data?${params}`);
+  };
+
+  // Toggle between Globe and Map
+  const toggleView = () => {
+    setIsGlobe((prevIsGlobe) => !prevIsGlobe);
+  };
 
   return (
     <div>
@@ -57,28 +59,47 @@ const handleNavigateSearch = () => {
         <Row>
           <Col>
             <div className="bubble-header">
-              <h1 >Welcome to Landsat Data Viewer</h1>
+              <h1>Welcome to Landsat Data Viewer</h1>
               <h3>A SpaceApps Challenge Project</h3>
             </div>
           </Col>
         </Row>
       </Container>
-      <Container className="mt-4">
-      <MapContainer center={position} zoom={2} style={{ height: '400px', width: '100%' }}>
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        {marker && (
-          <Marker position={marker}>
-            <Popup>
-              Selected Location: <br /> Latitude: {marker[0]} <br /> Longitude: {marker[1]}
-            </Popup>
-          </Marker>
+
+      {/* Toggle Button to switch between Globe and Map */}
+      <div className="mt-3 text-center">
+        <Button variant="primary" onClick={toggleView}>
+          {isGlobe ? 'Switch to Map' : 'Switch to Globe'}
+        </Button>
+      </div>
+
+      <div className="mt-4">
+        {isGlobe ? (
+          <div>
+            <h2>Select a location on the Globe:</h2>
+            <InteractiveGlobe onCoordinatesSelected={handleCoordinatesSelection} />
+          </div>
+        ) : (
+          <div>
+            <h2>Select a location on the Map:</h2>
+            <MapContainer center={position} zoom={2} style={{ height: '400px', width: '100%' }}>
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              {marker && (
+                <Marker position={marker}>
+                  <Popup>
+                    Selected Location: <br /> Latitude: {marker[0]} <br /> Longitude: {marker[1]}
+                  </Popup>
+                </Marker>
+              )}
+              <MapClickHandler /> {/* Include the click handler */}
+            </MapContainer>
+          </div>
         )}
-        <MapClickHandler />
-      </MapContainer>
-      </Container>
+      </div>
+
       <div className="mt-3">
         <Form>
           <Form.Group controlId="latitude">
@@ -102,24 +123,24 @@ const handleNavigateSearch = () => {
           <Form.Group controlId="dateRange">
             <Row>
               <Col>
-              Starting Date
-              <Form.Group as={Form.Col} controlId="startDate">
-                <Form.Control
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-              </Form.Group>
+                Starting Date
+                <Form.Group as={Form.Col} controlId="startDate">
+                  <Form.Control
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                </Form.Group>
               </Col>
               <Col>
-              Ending Date
-              <Form.Group as={Form.Col} controlId="endDate">
-                <Form.Control
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
-              </Form.Group>
+                Ending Date
+                <Form.Group as={Form.Col} controlId="endDate">
+                  <Form.Control
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                  />
+                </Form.Group>
               </Col>
             </Row>
           </Form.Group>
@@ -136,6 +157,7 @@ const handleNavigateSearch = () => {
           </Form.Group>
         </Form>
       </div>
+
       {/* Button to trigger navigation */}
       <Button className="mt-3" onClick={handleNavigateSearch}>
         View Landsat Data
