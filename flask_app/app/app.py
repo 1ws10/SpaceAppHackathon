@@ -14,6 +14,7 @@ import os
 import ee
 import authentication
 import sqlite3
+import commands
 
 
 # Initialize the database and scheduler
@@ -62,6 +63,52 @@ def create_app():
         if not loggedIn:
             return jsonify({'message': 'Invalid email or password.'}), 401
         return jsonify({'message': 'Login successful!'}), 200
+    
+    @app.route('/save-data', methods=['POST'])
+    def save():
+        name = request.form['name']
+        lat = request.form['lat']
+        long = request.form['long']
+        start = request.form['start']
+        end = request.form['end']
+        email  = request.form['email']
+        cloud = request.form['cloud']
+        try:
+            print("test1")
+            commands.createData(name, lat, long, start, end, email, cloud)
+            print("test2")
+            return jsonify({'message': 'Successfully added to database!'}), 200
+        except Exception as e:  # Catching specific exceptions is better practice
+            print(f"Error: {e}")  # Log the error for debugging
+            return jsonify({'message': 'Unable to save to database!'}), 401
+            
+    @app.route('/get-data', methods=['POST'])
+    def get_data():
+        email = request.form['email']
+        try:
+            all_data = commands.getData(email)
+
+            # Convert rows into a list of dictionaries if necessary
+            # This step depends on how your data is structured. If you're getting rows as tuples,
+            # you can manually format it like this:
+            print(all_data)
+            data = []
+            for row in all_data:
+                data.append({
+                    'name': row[0],  
+                    'lat': row[1],  
+                    'long': row[2],  
+                    'cloud': row[3],  
+                    'start': row[4],  
+                    'end': row[5],  
+                    'email': row[6],  
+                })
+
+            # Return data as JSON
+            return jsonify(data), 200
+        except Exception as e:
+            print(e)
+            return jsonify({'error': str(e)}), 500
 
     @app.route('/register', methods=['POST'])
     def register():

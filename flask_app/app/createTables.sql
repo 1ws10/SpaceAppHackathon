@@ -12,15 +12,14 @@ CREATE TABLE User (
 );
 
 CREATE TABLE Data (
-    dataID INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
-    userID INTEGER NOT NULL,
     lat TEXT NOT NULL,
     long TEXT NOT NULL,
     cloudCoverage INTEGER,
     startDate TEXT,
     endDate TEXT,
-    FOREIGN KEY (userID) REFERENCES User(userID) ON DELETE CASCADE
+    email TEXT,
+    PRIMARY KEY (name, email)
 );
 
 CREATE TABLE Notification (
