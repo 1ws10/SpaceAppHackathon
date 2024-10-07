@@ -9,8 +9,8 @@ ___________
 1. Warda Saleh    : warda.mu01@gmail.com
 2. Jack Rubio     : rubiojack123@gmail.com
 3. Pramit Shende  : pramitshende@gmail.com
-4. Donyal         :
-5. Kyle           :
+4. Donyal Haji    : danyalalihaji@gmail.com
+5. Kyle Lai Thom  : klaithom@gmail.com
 6. Cameron Angle  : camronangled@gmail.com
 
 
