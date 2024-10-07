@@ -23,7 +23,7 @@ def createData(name: str, lat: float, long: float,  start: str, end: str, email:
             cursor.execute("INSERT INTO DATA (name, lat, long, cloudCoverage, startDate, endDate, email) VALUES (?, ?, ?, ?, ?, ?, ?)", (name,  lat, long, cloudCoverage, start, end, email))
             db.commit()
     except sqlite3.IntegrityError as e:
-        print(e)
+        print()
     return
 
 def createNotification(dataID: int, timeNotify: str, timeNextPass: str, type: str):
