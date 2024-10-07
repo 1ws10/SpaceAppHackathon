@@ -79,25 +79,22 @@ const DataDisplay = () => {
   };
 
   const handleSaveSubmit = async () => {
-    const saveData = {
-      email,
-      name,
-      latitude,
-      longitude,
-      startDate,
-      endDate,
-      cloudCoverage,
-    };
-
+    // Create a new FormData object
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("name", name);
+    formData.append("lat", latitude);
+    formData.append("long", longitude);
+    formData.append("start", startDate);
+    formData.append("end", endDate);
+    formData.append("cloud", cloudCoverage);
+  
     try {
-      const response = await fetch("/save-query", {
+      const response = await fetch("/save-data", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(saveData),
+        body: formData, // Send the FormData directly
       });
-
+  
       if (response.ok) {
         setSuccess(true); // Show success state
         setTimeout(() => {
@@ -113,6 +110,7 @@ const DataDisplay = () => {
       console.error("Error saving data", err);
     }
   };
+  
 
   const handleCloseSaveModal = () => {
     setShowSaveModal(false);
@@ -144,7 +142,7 @@ const DataDisplay = () => {
   };
 
   const handleSelectData = (item) => {
-    const { latitude, longitude, startDate, endDate, cloudCoverage } = item; // Assuming item has these properties
+    const { lat, long, startDate, endDate, cloudCoverage } = item; // Assuming item has these properties
     navigate(`/data-display?latitude=${latitude}&longitude=${longitude}&startDate=${startDate}&endDate=${endDate}&cloudCoverage=${cloudCoverage}`);
   };
 
