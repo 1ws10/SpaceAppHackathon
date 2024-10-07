@@ -93,11 +93,11 @@ def create_app():
                 data.append({
                     'name': row[0],  
                     'lat': row[1],  
-                    'long': row[1],  
-                    'cloud': row[1],  
-                    'start': row[1],  
-                    'end': row[1],  
-                    'email': row[1],  
+                    'long': row[2],  
+                    'cloud': row[3],  
+                    'start': row[4],  
+                    'end': row[5],  
+                    'email': row[6],  
                 })
 
             # Return data as JSON
