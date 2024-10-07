@@ -58,7 +58,7 @@ const DataDisplay = () => {
     };
 
     fetchPixelData();
-  }, []);
+  }, [location.search]);
 
   const handleDataReceived = (data) => {
     setPixelData(data);
@@ -131,6 +131,7 @@ const DataDisplay = () => {
 
       const data = await response.json();
       if (response.ok) {
+
         setSavedData(data); // Set fetched saved data
       } else {
         console.error("Failed to fetch saved data");
@@ -141,9 +142,9 @@ const DataDisplay = () => {
   };
 
   const handleSelectData = (item) => {
-    const { lat, long, startDate, endDate, cloudCoverage } = item; // Assuming item has these properties
-    navigate(`/data-display?latitude=${latitude}&longitude=${longitude}&startDate=${startDate}&endDate=${endDate}&cloudCoverage=${cloudCoverage}`);
-  };
+    const { lat, long, start, end, cloud } = item; // Assuming item has these properties
+    navigate(`/data-display?latitude=${lat}&longitude=${long}&startDate=${start}&endDate=${end}&cloudCoverage=${cloud}`);
+};
 
   if (error) {
     return (
