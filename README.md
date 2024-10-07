@@ -44,12 +44,12 @@ Run the application with:
   python app.py
 OR
   python3 app.py
-
+when running, commit 86abc4d from don-flask
 
 Known Issues:
 ___________
-
-
+- GEE API is not working
+- GPT API
 
 
 
