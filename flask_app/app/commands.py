@@ -1,6 +1,6 @@
 import sqlite3
 
-db = sqlite3.connect('database.db')
+db = sqlite3.connect('flask_app/app/database.db')
 cursor = db.cursor()
 
 def createUser(email: str, password: str, phone = None):
@@ -16,8 +16,11 @@ def createUser(email: str, password: str, phone = None):
     return
 
 def createData(name: str, lat: float, long: float,  start: str, end: str, email: str, cloudCoverage: int = 0):
-    cursor.execute("INSERT INTO DATA (name, lat, long, cloudCoverage, startDate, endDate, email) VALUES (?, ?, ?, ?, ?, ?, ?)", (name,  lat, long, cloudCoverage, start, end, email))
-    db.commit()
+    try:
+        cursor.execute("INSERT INTO DATA (name, lat, long, cloudCoverage, startDate, endDate, email) VALUES (?, ?, ?, ?, ?, ?, ?)", (name,  lat, long, cloudCoverage, start, end, email))
+        db.commit()
+    except sqlite3.IntegrityError as e:
+        print(e)
     return
 
 def createNotification(dataID: int, timeNotify: str, timeNextPass: str, type: str):
@@ -49,7 +52,7 @@ def getData(email):
 
 
 # Testing
-# createData("My_Data1", 63.12323, 85.123123, "2024-10-6", "2024-10-6", "Kyle@KyleKyle.com", 4)
+createData("My_Data1", 63.12323, 85.123123, "2024-10-6", "2024-10-6", "Kyle@KyleKyle.com", 4)
 # db.close()
-# print(getData("Kyle@KyleKyle.com"))
+print(getData("Kyle@KyleKyle.com"))
 # print(getDataByEmail("Kyle@KyleKyle.com"))

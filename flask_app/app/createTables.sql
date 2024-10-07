@@ -12,14 +12,14 @@ CREATE TABLE User (
 );
 
 CREATE TABLE Data (
-    dataID INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
     lat TEXT NOT NULL,
     long TEXT NOT NULL,
     cloudCoverage INTEGER,
     startDate TEXT,
     endDate TEXT,
-    email TEXT
+    email TEXT,
+    PRIMARY KEY (name, email)
 );
 
 CREATE TABLE Notification (
