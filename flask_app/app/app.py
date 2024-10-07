@@ -80,17 +80,6 @@ def create_app():
     def dashboard():
         return jsonify({"message": "Welcome to the dashboard!"})
 
-    @app.route('/search', methods=['POST'])
-    def search():
-        latitude = float(request.form['latitude'])
-        longitude = float(request.form['longitude'])
-        date = request.form['date']
-
-        # Query Landsat overpasses using Earth Engine
-        overpasses = get_landsat_overpasses(latitude, longitude, date)
-
-        # Return the overpass metadata as JSON
-        return jsonify(overpasses)
 
     @app.route('/search-data', methods=['POST'])
     def search_data():
@@ -204,6 +193,8 @@ def create_app():
 
     # Serve React App
     @app.route('/')
+    @app.route('/data-display')
+    @app.route('/search')
     @app.route('/<path:path>', methods=['GET'])
     def serve_react_app(path=None):
         # Get the absolute path to the build directory

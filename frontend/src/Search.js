@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  useMapEvents,
-} from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import dayjs, { Dayjs } from "dayjs";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
@@ -13,7 +7,7 @@ import Button from "@mui/material/Button";
 import Slider from "@mui/material/Slider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import InteractiveGlobe from "./InteractiveGlobe";
 
 const Search = () => {
@@ -75,18 +69,14 @@ const Search = () => {
 
       {/* Toggle Button to switch between Globe and Map */}
       <div className="mt-3 text-center">
-        <button onClick={toggleView}>
-          {isGlobe ? "Switch to Map" : "Switch to Globe"}
-        </button>
+        <button onClick={toggleView}>{isGlobe ? "Switch to Map" : "Switch to Globe"}</button>
       </div>
 
       <div className="mt-4">
         {isGlobe ? (
           <div>
             <h2>Select a location on the Globe:</h2>
-            <InteractiveGlobe
-              onCoordinatesSelected={handleCoordinatesSelection}
-            />
+            <InteractiveGlobe onCoordinatesSelected={handleCoordinatesSelection} />
           </div>
         ) : (
           <div>
@@ -103,49 +93,25 @@ const Search = () => {
               {marker && (
                 <Marker position={marker}>
                   <Popup>
-                    Selected Location: <br /> Latitude: {marker[0]} <br />{" "}
-                    Longitude: {marker[1]}
+                    Selected Location: <br /> Latitude: {marker[0]} <br /> Longitude: {marker[1]}
                   </Popup>
                 </Marker>
               )}
-              <MapClickHandler /> 
+              <MapClickHandler />
             </MapContainer>
           </div>
         )}
       </div>
 
       <div className="mt-8 flex gap-4 flex-col md:flex-row">
-        <TextField
-          label="Latitude"
-          variant="outlined"
-          value={latitude}
-          onChange={(e) => setLatitude(e.target.value)}
-          placeholder="Enter Latitude"
-        />
-        <TextField
-          label="Longitude"
-          variant="outlined"
-          value={longitude}
-          onChange={(e) => setLongitude(e.target.value)}
-          placeholder="Enter Longitude"
-        />
+        <TextField label="Latitude" variant="outlined" value={latitude} onChange={(e) => setLatitude(e.target.value)} placeholder="Enter Latitude" />
+        <TextField label="Longitude" variant="outlined" value={longitude} onChange={(e) => setLongitude(e.target.value)} placeholder="Enter Longitude" />
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            label="Start Date"
-            value={startDate}
-            onChange={(newValue) => setStartDate(newValue)}
-          />
-          <DatePicker
-            label="End Date"
-            defaultValue={dayjs()}
-            value={endDate}
-            onChange={(newValue) => setEndDate(newValue)}
-          />
+          <DatePicker label="Start Date" value={startDate} onChange={(newValue) => setStartDate(newValue)} />
+          <DatePicker label="End Date" defaultValue={dayjs()} value={endDate} onChange={(newValue) => setEndDate(newValue)} />
         </LocalizationProvider>
         <div>
-          <label htmlFor="cloudCoverage">
-            Maximum Cloud Coverage (%):
-          </label>
+          <label htmlFor="cloudCoverage">Maximum Cloud Coverage (%):</label>
           <Slider
             id="cloudCoverage"
             defaultValue={10}
@@ -162,12 +128,7 @@ const Search = () => {
       </div>
 
       {/* Button to trigger navigation */}
-      <Button
-        variant="contained"
-        color="primary"
-        className="mt-3"
-        onClick={handleNavigateSearch}
-      >
+      <Button variant="contained" color="primary" className="mt-3" onClick={handleNavigateSearch}>
         View Landsat Data
       </Button>
     </div>
