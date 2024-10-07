@@ -1,6 +1,6 @@
 import sqlite3
 
-db = sqlite3.connect('flask_app/app/database.db')
+db = sqlite3.connect('database.db')
 cursor = db.cursor()
 
 def createUser(email: str, password: str, phone = None):
