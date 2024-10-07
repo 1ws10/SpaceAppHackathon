@@ -62,7 +62,7 @@ def getData(email):
 
 
 # Testing
-createData("My_Data1", 63.12323, 85.123123, "2024-10-6", "2024-10-6", "Kyle@KyleKyle.com", 4)
+# createData("My_Data1", 63.12323, 85.123123, "2024-10-6", "2024-10-6", "Kyle@KyleKyle.com", 4)
 # db.close()
-print(getData("Kyle@KyleKyle.com"))
+# print(getData("Kyle@KyleKyle.com"))
 # print(getDataByEmail("Kyle@KyleKyle.com"))
