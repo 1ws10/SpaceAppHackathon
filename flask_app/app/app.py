@@ -17,6 +17,8 @@ import authentication
 import sqlite3
 import openai 
 
+import commands
+
 
 # Initialize the database and scheduler
 db = SQLAlchemy()
@@ -67,6 +69,52 @@ def create_app():
         if not loggedIn:
             return jsonify({'message': 'Invalid email or password.'}), 401
         return jsonify({'message': 'Login successful!'}), 200
+    
+    @app.route('/save-data', methods=['POST'])
+    def save():
+        name = request.form['name']
+        lat = request.form['lat']
+        long = request.form['long']
+        start = request.form['start']
+        end = request.form['end']
+        email  = request.form['email']
+        cloud = request.form['cloud']
+        try:
+            print("test1")
+            commands.createData(name, lat, long, start, end, email, cloud)
+            print("test2")
+            return jsonify({'message': 'Successfully added to database!'}), 200
+        except Exception as e:  # Catching specific exceptions is better practice
+            print(f"Error: {e}")  # Log the error for debugging
+            return jsonify({'message': 'Unable to save to database!'}), 401
+            
+    @app.route('/get-data', methods=['POST'])
+    def get_data():
+        email = request.form['email']
+        try:
+            all_data = commands.getData(email)
+
+            # Convert rows into a list of dictionaries if necessary
+            # This step depends on how your data is structured. If you're getting rows as tuples,
+            # you can manually format it like this:
+            print(all_data)
+            data = []
+            for row in all_data:
+                data.append({
+                    'name': row[0],  
+                    'lat': row[1],  
+                    'long': row[2],  
+                    'cloud': row[3],  
+                    'start': row[4],  
+                    'end': row[5],  
+                    'email': row[6],  
+                })
+
+            # Return data as JSON
+            return jsonify(data), 200
+        except Exception as e:
+            print(e)
+            return jsonify({'error': str(e)}), 500
 
     @app.route('/register', methods=['POST'])
     def register():
@@ -98,35 +146,30 @@ def create_app():
 
         point = ee.Geometry.Point([longitude, latitude])
 
-
         # Filter the Landsat 9 image collection
-        # collection = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
-        #     .filterDate(start_date, end_date) \
-        #     .filterBounds(point) \
-        #     .filter(ee.Filter.lt('CLOUD_COVER', cloud_coverage))
         landsat_sr = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
                 .filterBounds(point) \
                 .filterDate(start_date, end_date) \
                 .filter(ee.Filter.lt('CLOUD_COVER', cloud_coverage))
 
-        # Get the first image from the collection
-        # image = collection.first()
-        image = landsat_sr.first()
-        # Check if an image exists
-        if image.getInfo() is None:
-            return jsonify({'error': 'No images found for the given parameters.'}), 404
+        # Get the list of images in the collection
+        images = landsat_sr.toList(landsat_sr.size())
 
-        # Get the pixel value at the point
-        selected_pixel = image.sample(point, scale=30).first().toDictionary().getInfo()
+        # Initialize an empty list to store pixel values
+        pixel_values = []
 
-        # Get surrounding pixels (e.g., a 3x3 window around the point)
-        neighborhood = image.neighborhoodToArray(ee.Kernel.square(1))
-        neighborhood_values = neighborhood.sample(point, scale=30).first().toDictionary().getInfo()
+        # Loop through each image and get the pixel value at the point
+        for i in range(images.size().getInfo()):
+            image = ee.Image(images.get(i))
+            pixel_value = image.sample(point, scale=30).first().toDictionary().getInfo()
+            image_thumbnail = image.getThumbURL({'dimensions': 128, 'bands': ['SR_B4', 'SR_B3', 'SR_B2']})
+            pixel_value['date'] = image.date().format('YYYY-MM-dd').getInfo()
+            pixel_value['thumbnail'] = image_thumbnail
+            pixel_values.append(pixel_value)
 
-        # Return the pixel data
+        # Return the pixel data along with the GIF URL
         return jsonify({
-            'selectedPixel': selected_pixel,
-            'surroundingPixels': neighborhood_values
+            'pixelValues': pixel_values,
         })
 
 

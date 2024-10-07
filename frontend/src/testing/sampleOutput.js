@@ -1,350 +1,403 @@
 const sampleOutput = {
-    "selectedPixel": {
-        "QA_PIXEL": 21824,
-        "QA_RADSAT": 0,
-        "SR_B1": 8312,
-        "SR_B2": 8926,
-        "SR_B3": 9927,
-        "SR_B4": 10812,
-        "SR_B5": 12996,
-        "SR_B6": 14410,
-        "SR_B7": 12712,
-        "SR_QA_AEROSOL": 160,
-        "ST_ATRAN": 9161,
-        "ST_B10": 39870,
-        "ST_CDIST": 536,
-        "ST_DRAD": 306,
-        "ST_EMIS": 9772,
-        "ST_EMSD": 58,
-        "ST_QA": 213,
-        "ST_TRAD": 7434,
-        "ST_URAD": 573
+  gif: "https://earthengine.googleapis.com/v1alpha/projects/earthengine-legacy/videoThumbnails/052d7d1ec2df72d4776bdee2e7060347-3d3a90adc5c8a33f8ee16bdac12b5249:getPixels",
+  pixelValues: [
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 9994,
+      SR_B2: 10593,
+      SR_B3: 12231,
+      SR_B4: 14299,
+      SR_B5: 17361,
+      SR_B6: 19805,
+      SR_B7: 18132,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 8725,
+      ST_B10: 48751,
+      ST_CDIST: 3071,
+      ST_DRAD: 472,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 184,
+      ST_TRAD: 11101,
+      ST_URAD: 898,
+      date: "2023-10-18",
     },
-    "surroundingPixels": {
-        "QA_PIXEL": [
-            [
-                21824,
-                21824,
-                21824
-            ],
-            [
-                21824,
-                21824,
-                21824
-            ],
-            [
-                21824,
-                21824,
-                21824
-            ]
-        ],
-        "QA_RADSAT": [
-            [
-                0,
-                0,
-                0
-            ],
-            [
-                0,
-                0,
-                0
-            ],
-            [
-                0,
-                0,
-                0
-            ]
-        ],
-        "SR_B1": [
-            [
-                8260,
-                8516,
-                8354
-            ],
-            [
-                8054,
-                8312,
-                8198
-            ],
-            [
-                7827,
-                8102,
-                7872
-            ]
-        ],
-        "SR_B2": [
-            [
-                8938,
-                9072,
-                8923
-            ],
-            [
-                8702,
-                8926,
-                8811
-            ],
-            [
-                8456,
-                8786,
-                8578
-            ]
-        ],
-        "SR_B3": [
-            [
-                9743,
-                9877,
-                9777
-            ],
-            [
-                9566,
-                9927,
-                9677
-            ],
-            [
-                9246,
-                9731,
-                9572
-            ]
-        ],
-        "SR_B4": [
-            [
-                10659,
-                10781,
-                10667
-            ],
-            [
-                10464,
-                10812,
-                10566
-            ],
-            [
-                10065,
-                10584,
-                10465
-            ]
-        ],
-        "SR_B5": [
-            [
-                12916,
-                13038,
-                13033
-            ],
-            [
-                12630,
-                12996,
-                12875
-            ],
-            [
-                12154,
-                12727,
-                12698
-            ]
-        ],
-        "SR_B6": [
-            [
-                13924,
-                14978,
-                15107
-            ],
-            [
-                13137,
-                14410,
-                14678
-            ],
-            [
-                12482,
-                13913,
-                14091
-            ]
-        ],
-        "SR_B7": [
-            [
-                12158,
-                13377,
-                13382
-            ],
-            [
-                11309,
-                12712,
-                13064
-            ],
-            [
-                10655,
-                12186,
-                12371
-            ]
-        ],
-        "SR_QA_AEROSOL": [
-            [
-                160,
-                96,
-                160
-            ],
-            [
-                160,
-                160,
-                160
-            ],
-            [
-                160,
-                130,
-                160
-            ]
-        ],
-        "ST_ATRAN": [
-            [
-                9161,
-                9160,
-                9160
-            ],
-            [
-                9161,
-                9161,
-                9160
-            ],
-            [
-                9161,
-                9161,
-                9161
-            ]
-        ],
-        "ST_B10": [
-            [
-                39878,
-                39870,
-                39858
-            ],
-            [
-                39882,
-                39870,
-                39845
-            ],
-            [
-                39850,
-                39850,
-                39832
-            ]
-        ],
-        "ST_CDIST": [
-            [
-                538,
-                539,
-                540
-            ],
-            [
-                535,
-                536,
-                537
-            ],
-            [
-                532,
-                533,
-                535
-            ]
-        ],
-        "ST_DRAD": [
-            [
-                306,
-                306,
-                306
-            ],
-            [
-                306,
-                306,
-                306
-            ],
-            [
-                306,
-                306,
-                306
-            ]
-        ],
-        "ST_EMIS": [
-            [
-                9774,
-                9774,
-                9776
-            ],
-            [
-                9773,
-                9772,
-                9775
-            ],
-            [
-                9774,
-                9772,
-                9774
-            ]
-        ],
-        "ST_EMSD": [
-            [
-                58,
-                58,
-                58
-            ],
-            [
-                58,
-                58,
-                58
-            ],
-            [
-                58,
-                58,
-                58
-            ]
-        ],
-        "ST_QA": [
-            [
-                213,
-                213,
-                213
-            ],
-            [
-                213,
-                213,
-                213
-            ],
-            [
-                213,
-                213,
-                213
-            ]
-        ],
-        "ST_TRAD": [
-            [
-                7438,
-                7435,
-                7431
-            ],
-            [
-                7439,
-                7434,
-                7426
-            ],
-            [
-                7426,
-                7426,
-                7420
-            ]
-        ],
-        "ST_URAD": [
-            [
-                573,
-                574,
-                574
-            ],
-            [
-                573,
-                573,
-                574
-            ],
-            [
-                573,
-                573,
-                573
-            ]
-        ]
-    }
-}
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 9718,
+      SR_B2: 10337,
+      SR_B3: 11925,
+      SR_B4: 13720,
+      SR_B5: 16516,
+      SR_B6: 19347,
+      SR_B7: 18138,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 9342,
+      ST_B10: 45670,
+      ST_CDIST: 907,
+      ST_DRAD: 248,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 228,
+      ST_TRAD: 9871,
+      ST_URAD: 451,
+      date: "2023-11-03",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 9696,
+      SR_B2: 10253,
+      SR_B3: 11746,
+      SR_B4: 13355,
+      SR_B5: 15695,
+      SR_B6: 18385,
+      SR_B7: 17157,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 8835,
+      ST_B10: 43768,
+      ST_CDIST: 973,
+      ST_DRAD: 432,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 222,
+      ST_TRAD: 8919,
+      ST_URAD: 819,
+      date: "2023-11-19",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 9937,
+      SR_B2: 10481,
+      SR_B3: 12002,
+      SR_B4: 13774,
+      SR_B5: 15990,
+      SR_B6: 18856,
+      SR_B7: 17811,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 9147,
+      ST_B10: 43592,
+      ST_CDIST: 907,
+      ST_DRAD: 289,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 226,
+      ST_TRAD: 8841,
+      ST_URAD: 535,
+      date: "2023-12-05",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 10085,
+      SR_B2: 10597,
+      SR_B3: 12045,
+      SR_B4: 13882,
+      SR_B5: 16177,
+      SR_B6: 19071,
+      SR_B7: 17787,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 8443,
+      ST_B10: 43787,
+      ST_CDIST: 905,
+      ST_DRAD: 520,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 224,
+      ST_TRAD: 8762,
+      ST_URAD: 1012,
+      date: "2023-12-21",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 9987,
+      SR_B2: 10565,
+      SR_B3: 12143,
+      SR_B4: 13981,
+      SR_B5: 16158,
+      SR_B6: 19189,
+      SR_B7: 18241,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 9432,
+      ST_B10: 40250,
+      ST_CDIST: 881,
+      ST_DRAD: 178,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 228,
+      ST_TRAD: 7463,
+      ST_URAD: 309,
+      date: "2024-01-06",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 9975,
+      SR_B2: 10577,
+      SR_B3: 12135,
+      SR_B4: 14049,
+      SR_B5: 16316,
+      SR_B6: 19282,
+      SR_B7: 18129,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 8986,
+      ST_B10: 43547,
+      ST_CDIST: 2054,
+      ST_DRAD: 341,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 184,
+      ST_TRAD: 8777,
+      ST_URAD: 636,
+      date: "2024-01-22",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 9491,
+      SR_B2: 10033,
+      SR_B3: 11288,
+      SR_B4: 12604,
+      SR_B5: 14428,
+      SR_B6: 15745,
+      SR_B7: 14842,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 9185,
+      ST_B10: 43996,
+      ST_CDIST: 465,
+      ST_DRAD: 267,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 229,
+      ST_TRAD: 9002,
+      ST_URAD: 486,
+      date: "2024-02-23",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 10298,
+      SR_B2: 10922,
+      SR_B3: 12626,
+      SR_B4: 14654,
+      SR_B5: 17434,
+      SR_B6: 20114,
+      SR_B7: 18857,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 9355,
+      ST_B10: 48109,
+      ST_CDIST: 974,
+      ST_DRAD: 234,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 228,
+      ST_TRAD: 11031,
+      ST_URAD: 421,
+      date: "2024-04-11",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 10447,
+      SR_B2: 11078,
+      SR_B3: 12829,
+      SR_B4: 15134,
+      SR_B5: 17864,
+      SR_B6: 21106,
+      SR_B7: 19730,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 9006,
+      ST_B10: 50877,
+      ST_CDIST: 3065,
+      ST_DRAD: 366,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 191,
+      ST_TRAD: 12276,
+      ST_URAD: 685,
+      date: "2024-05-13",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 10698,
+      SR_B2: 11330,
+      SR_B3: 13085,
+      SR_B4: 15397,
+      SR_B5: 18124,
+      SR_B6: 21345,
+      SR_B7: 19617,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 7887,
+      ST_B10: 52688,
+      ST_CDIST: 2026,
+      ST_DRAD: 827,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 204,
+      ST_TRAD: 12669,
+      ST_URAD: 1674,
+      date: "2024-05-29",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 10586,
+      SR_B2: 11245,
+      SR_B3: 13101,
+      SR_B4: 15456,
+      SR_B5: 18235,
+      SR_B6: 21339,
+      SR_B7: 19762,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 8085,
+      ST_B10: 52432,
+      ST_CDIST: 1727,
+      ST_DRAD: 790,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 210,
+      ST_TRAD: 12748,
+      ST_URAD: 1601,
+      date: "2024-06-14",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 10558,
+      SR_B2: 11220,
+      SR_B3: 12990,
+      SR_B4: 15190,
+      SR_B5: 17789,
+      SR_B6: 21114,
+      SR_B7: 19238,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 6253,
+      ST_B10: 52925,
+      ST_CDIST: 227,
+      ST_DRAD: 1361,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 314,
+      ST_TRAD: 11750,
+      ST_URAD: 2934,
+      date: "2024-06-30",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 10460,
+      SR_B2: 11047,
+      SR_B3: 12826,
+      SR_B4: 15011,
+      SR_B5: 17592,
+      SR_B6: 21016,
+      SR_B7: 19638,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 7033,
+      ST_B10: 51529,
+      ST_CDIST: 114,
+      ST_DRAD: 1114,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 338,
+      ST_TRAD: 11671,
+      ST_URAD: 2339,
+      date: "2024-07-16",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 10370,
+      SR_B2: 10936,
+      SR_B3: 12700,
+      SR_B4: 14844,
+      SR_B5: 17531,
+      SR_B6: 20954,
+      SR_B7: 19443,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 7227,
+      ST_B10: 49730,
+      ST_CDIST: 427,
+      ST_DRAD: 1080,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 242,
+      ST_TRAD: 11099,
+      ST_URAD: 2247,
+      date: "2024-08-01",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 11284,
+      SR_B2: 11816,
+      SR_B3: 13870,
+      SR_B4: 15665,
+      SR_B5: 18288,
+      SR_B6: 21550,
+      SR_B7: 19208,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 7569,
+      ST_B10: 51954,
+      ST_CDIST: 89,
+      ST_DRAD: 967,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 335,
+      ST_TRAD: 12229,
+      ST_URAD: 2002,
+      date: "2024-08-17",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 10298,
+      SR_B2: 10893,
+      SR_B3: 12589,
+      SR_B4: 14757,
+      SR_B5: 17105,
+      SR_B6: 20183,
+      SR_B7: 19011,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 7434,
+      ST_B10: 51695,
+      ST_CDIST: 3067,
+      ST_DRAD: 995,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 200,
+      ST_TRAD: 11994,
+      ST_URAD: 2061,
+      date: "2024-09-18",
+    },
+    {
+      QA_PIXEL: 21824,
+      QA_RADSAT: 0,
+      SR_B1: 10339,
+      SR_B2: 10899,
+      SR_B3: 12617,
+      SR_B4: 14875,
+      SR_B5: 17266,
+      SR_B6: 20365,
+      SR_B7: 19463,
+      SR_QA_AEROSOL: 96,
+      ST_ATRAN: 8627,
+      ST_B10: 48840,
+      ST_CDIST: 878,
+      ST_DRAD: 530,
+      ST_EMIS: 9689,
+      ST_EMSD: 150,
+      ST_QA: 230,
+      ST_TRAD: 11165,
+      ST_URAD: 1034,
+      date: "2024-10-04",
+    },
+  ],
+};
 
 export default sampleOutput;
