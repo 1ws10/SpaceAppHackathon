@@ -8,7 +8,6 @@ def createUser(email: str, password: str, phone = None):
             cursor = db.cursor()
             cursor.execute("INSERT INTO User (email, password, phone) VALUES (?, ?, ?)", (email, password, phone))
             db.commit()
-            db.close()
     except sqlite3.IntegrityError as e:
             raise e
 
@@ -23,9 +22,8 @@ def createData(name: str, lat: float, long: float,  start: str, end: str, email:
             cursor = db.cursor()
             cursor.execute("INSERT INTO DATA (name, lat, long, cloudCoverage, startDate, endDate, email) VALUES (?, ?, ?, ?, ?, ?, ?)", (name,  lat, long, cloudCoverage, start, end, email))
             db.commit()
-            db.close()
     except sqlite3.IntegrityError as e:
-        print(e)
+        print()
     return
 
 def createNotification(dataID: int, timeNotify: str, timeNextPass: str, type: str):
@@ -33,7 +31,6 @@ def createNotification(dataID: int, timeNotify: str, timeNextPass: str, type: st
         cursor = db.cursor()
         cursor.execute("INSERT INTO Notification (dataID, timeNotify, hasNotified, timeNextPass, type) values (?, ?, FALSE, ?, ?)", (dataID, timeNotify, timeNextPass, type))
         db.commit()
-        db.close()
     return
 
 # def getPassword(email: str):
