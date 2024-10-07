@@ -1,12 +1,14 @@
 import sqlite3
 
-db = sqlite3.connect('database.db')
-cursor = db.cursor()
+
 
 def createUser(email: str, password: str, phone = None):
     try:
-        cursor.execute("INSERT INTO User (email, password, phone) VALUES (?, ?, ?)", (email, password, phone))
-        db.commit()
+        with sqlite3.connect('database.db') as db:
+            cursor = db.cursor()
+            cursor.execute("INSERT INTO User (email, password, phone) VALUES (?, ?, ?)", (email, password, phone))
+            db.commit()
+            db.close()
     except sqlite3.IntegrityError as e:
             raise e
 
@@ -17,32 +19,40 @@ def createUser(email: str, password: str, phone = None):
 
 def createData(name: str, lat: float, long: float,  start: str, end: str, email: str, cloudCoverage: int = 0):
     try:
-        cursor.execute("INSERT INTO DATA (name, lat, long, cloudCoverage, startDate, endDate, email) VALUES (?, ?, ?, ?, ?, ?, ?)", (name,  lat, long, cloudCoverage, start, end, email))
-        db.commit()
+        with sqlite3.connect('database.db') as db:
+            cursor = db.cursor()
+            cursor.execute("INSERT INTO DATA (name, lat, long, cloudCoverage, startDate, endDate, email) VALUES (?, ?, ?, ?, ?, ?, ?)", (name,  lat, long, cloudCoverage, start, end, email))
+            db.commit()
+            db.close()
     except sqlite3.IntegrityError as e:
         print(e)
     return
 
 def createNotification(dataID: int, timeNotify: str, timeNextPass: str, type: str):
-    cursor.execute("INSERT INTO Notification (dataID, timeNotify, hasNotified, timeNextPass, type) values (?, ?, FALSE, ?, ?)", (dataID, timeNotify, timeNextPass, type))
-    db.commit()
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        cursor.execute("INSERT INTO Notification (dataID, timeNotify, hasNotified, timeNextPass, type) values (?, ?, FALSE, ?, ?)", (dataID, timeNotify, timeNextPass, type))
+        db.commit()
+        db.close()
     return
 
-def getPassword(email: str):
-    cursor.execute("SELECT password FROM User WHERE email = ?", (email,))
-    result = cursor.fetchone()
-    if result:  
-        return result[0]
-    else:
-        return None
+# def getPassword(email: str):
+#     cursor.execute("SELECT password FROM User WHERE email = ?", (email,))
+#     result = cursor.fetchone()
+#     if result:  
+#         return result[0]
+#     else:
+#         return None
 
 def getData(email):
-    cursor.execute("SELECT * FROM Data WHERE email = ?", (email,))
-    result = cursor.fetchone()
-    if result:  
-        return result
-    else:
-        return None
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM Data WHERE email = ?", (email,))
+        result = cursor.fetchone()
+        if result:  
+            return result
+        else:
+            return None
 
 # def getDataByEmail(email: str):
 #     cursor.execute("SELECT Data.* FROM Data JOIN User ON Data.userID = User.userID WHERE User.email = ?", (email,))
