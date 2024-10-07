@@ -91,6 +91,7 @@ def create_app():
             # Convert rows into a list of dictionaries if necessary
             # This step depends on how your data is structured. If you're getting rows as tuples,
             # you can manually format it like this:
+            print(all_data)
             data = []
             for row in all_data:
                 data.append({
@@ -106,6 +107,7 @@ def create_app():
             # Return data as JSON
             return jsonify(data), 200
         except Exception as e:
+            print(e)
             return jsonify({'error': str(e)}), 500
 
     @app.route('/register', methods=['POST'])

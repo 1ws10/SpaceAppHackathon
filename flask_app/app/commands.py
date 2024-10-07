@@ -45,7 +45,7 @@ def getData(email):
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
         cursor.execute("SELECT * FROM Data WHERE email = ?", (email,))
-        result = cursor.fetchone()
+        result =  cursor.fetchall()  # This should return a list of tuples
         if result:  
             return result
         else:
