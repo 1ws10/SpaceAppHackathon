@@ -1,10 +1,10 @@
-LANDSAT Project - Version 1.0; 06/10/2024
+Landsat Reflectance Data: On the Fly and at Your Fingertips - 06/10/2024 - Version 1.0
 
 The project can be reached at:
 Website: http://127.0.0.1:5000
 
 Authors:
-___________
+_______
 
 1. Warda Saleh    : warda.mu01@gmail.com
 2. Jack Rubio     : rubiojack123@gmail.com
@@ -30,7 +30,7 @@ users informed with the latest knowledge.
 of the position of the satellite in real time.
 
 
-RUNNING INSTRUCTIONS:
+Running Instructions:
 ____________________
 In the terminal of your IDE:
 Install Node.js
@@ -53,7 +53,12 @@ ___________
 
 Next Steps:
 __________
-
+- Make it a mobile application
+- Make a timeline countdown to get live data, instead of going through pixels
+- Integrate camera function
+- Create an option to Zip file csv data and images obtained OR save them straight to google drive
+- Safe search in the category specified
+- Realtime switch between bandwidths
 
 
 
