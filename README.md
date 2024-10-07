@@ -2,22 +2,17 @@ LANDSAT Project - Version 1.0; 06/10/2024
 
 The project can be reached at:
 Website: http://127.0.0.1:5000
-Email: warda.mu01@gmail.com
-Email: 
-Email: 
-Email: 
-Email:
-Email:
 
 Authors:
 ___________
 
-1. Warda Saleh
-2. Jack Rubio
-3. Pramit 
-4. Donyal 
-5. Kyle 
-6. Cameron 
+1. Warda Saleh : warda.mu01@gmail.com
+2. Jack Rubio  :
+3. Pramit      :
+4. Donyal      :
+5. Kyle        :
+6. Cameron     :
+
 
 
 Project Description:
