@@ -51,15 +51,6 @@ ___________
 
 
 
-Next Steps:
-__________
-- Make it a mobile application
-- Make a timeline countdown to get live data, instead of going through pixels
-- Integrate camera function
-- Create an option to Zip file csv data and images obtained OR save them straight to google drive
-- Safe search in the category specified
-- Realtime switch between bandwidths
-
 
 
 Installation (Node.js):
