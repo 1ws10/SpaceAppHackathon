@@ -14,13 +14,16 @@ import os
 import ee
 import authentication
 import sqlite3
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
+from datetime import datetime
+import emailSend
 
 
 # Initialize the database and scheduler
 db = SQLAlchemy()
 scheduler = APScheduler()
 load_dotenv()
-mail = Mail()
 
 # Initialize Google Earth Engine with Service Account Credentials
 def init_earth_engine():
@@ -39,21 +42,55 @@ def create_app():
     app = Flask(__name__, static_folder='../../frontend/build', static_url_path='/')
 
     app.config.from_object('config.Config')
+    app.config['MAIL_SERVER'] = 'smtp.outlook.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
+    app.config['MAIL_USERNAME'] = 'spaceapp1232024@outlook.com'
+    app.config['MAIL_PASSWORD'] = 'MyPassword123' #MyPassword123
+    app.config['MAIL_DEFAULT_SENDER'] = 'spaceapp1232024@outlook.com'
+    mail = Mail(app)
 
     # Initialize Earth Engine
     init_earth_engine()
 
     # Initialize the database with the app
     db.init_app(app)
-    mail.init_app(app)  # Initialize Flask-Mail
+    # mail.init_app(app)  # Initialize Flask-Mail
 
     login_manager = LoginManager()
     login_manager.init_app(app)
 
     # Initialize the scheduler
-    scheduler.init_app(app)
-
+    # scheduler.init_app(app)
+    
+    scheduler = BackgroundScheduler()
+    scheduler.start()
+    
     # Flask API Routes
+    
+    @app.route('/schedule-email', methods=['POST'])
+    def schedule_email_route():
+        email = request.form['email']
+        subject = request.form['subject']
+        body = request.form['body']
+        send_time = request.form['send_time']
+        
+        print(f"Received send_time: {send_time}")  # Log the received time for debugging
+        print(email, subject, body)
+        
+        try:
+            # send_time = datetime.fromisoformat(send_time)
+            # emailSend.schedule_email(app, email, subject, body, send_time, scheduler, mail)
+            # emailSend.send_email(app, email, subject, body, mail)
+            msg = Message(subject, sender = "spaceapp2024@gmail.com", recipients = email, )
+            msg.body = body
+            mail.send(msg)
+            return jsonify({'message': f'Email scheduled to be sent at {send_time}'}), 200
+        except ValueError as e:
+            return jsonify({'message': f'{e}'}), 400
+
+
     @app.route('/login', methods=['POST'])
     def login():
         email = request.form['email']
@@ -73,23 +110,33 @@ def create_app():
         except sqlite3.IntegrityError as e:
             return jsonify({"message: User registration unsuccessful"}, 401)
         return
-
+        
 
     @app.route('/dashboard')
     @login_required
     def dashboard():
         return jsonify({"message": "Welcome to the dashboard!"})
 
+    @app.route('/search', methods=['POST'])
+    def search():
+        latitude = float(request.form['latitude'])
+        longitude = float(request.form['longitude'])
+        date = request.form['date']
 
-    @app.route('/search-data', methods=['POST'])
+        # Query Landsat overpasses using Earth Engine
+        overpasses = get_landsat_overpasses(latitude, longitude, date)
+
+        # Return the overpass metadata as JSON
+        return jsonify(overpasses)
+    
+    @app.route('/search-data', methods=['GET'])
     def search_data():
-        # Extract body data from the request
-        data = request.json
-        latitude = float(data['latitude'])
-        longitude = float(data['longitude'])
-        start_date = data['startDate']
-        end_date = data['endDate']
-        cloud_coverage = float(data['cloudCoverage'])
+        # Extract query parameters
+        latitude = request.args.get('latitude', type=float)
+        longitude = request.args.get('longitude', type=float)
+        start_date = request.args.get('startDate')
+        end_date = request.args.get('endDate')
+        cloud_coverage = request.args.get('cloudCoverage', type=int)
 
         point = ee.Geometry.Point([longitude, latitude])
 
@@ -102,7 +149,7 @@ def create_app():
         landsat_sr = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
                 .filterBounds(point) \
                 .filterDate(start_date, end_date) \
-                .filter(ee.Filter.lt('CLOUD_COVER', cloud_coverage))
+                .filter(ee.Filter.lt('CLOUD_COVER', 10))
 
         # Get the first image from the collection
         # image = collection.first()
@@ -123,8 +170,8 @@ def create_app():
             'selectedPixel': selected_pixel,
             'surroundingPixels': neighborhood_values
         })
-
-
+    
+        
 
     @app.route('/api/get-landsat-data', methods=['POST'])
     def get_landsat_data():
@@ -193,8 +240,6 @@ def create_app():
 
     # Serve React App
     @app.route('/')
-    @app.route('/data-display')
-    @app.route('/search')
     @app.route('/<path:path>', methods=['GET'])
     def serve_react_app(path=None):
         # Get the absolute path to the build directory
@@ -220,3 +265,4 @@ if __name__ == '__main__':
 
     # Run the app
     app.run(debug=True)
+
