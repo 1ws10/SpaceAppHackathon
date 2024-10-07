@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import WavelengthChart from "./chart";
+
 import sampleOutput from "./testing/sampleOutput";
 import {
   Dialog,
@@ -16,6 +17,7 @@ import {
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import wavelengths from "./constants";
 
+
 const DataDisplay = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -27,10 +29,16 @@ const DataDisplay = () => {
   const [showSaveModal, setShowSaveModal] = useState(false); // For showing the save email popup
   const [showViewModal, setShowViewModal] = useState(false); // For showing the view data popup
   const [email, setEmail] = useState(""); // For storing email input
+
+  const [userPrompt, setUserPrompt] = useState(""); // For storing the GPT prompt
+  const [messages, setMessages] = useState([]); // For storing chat messages
+  const [loadingGPT, setLoadingGPT] = useState(false); // To show loading while waiting for GPT response
+
   const [name, setName] = useState(""); // For storing name input
   const [success, setSuccess] = useState(false); // Success state to show checkmark
   const [savedData, setSavedData] = useState([]); // To store fetched saved data
   const [selectedData, setSelectedData] = useState(null); // To store the selected saved data
+
 
   const params = new URLSearchParams(location.search);
   const latitude = params.get("latitude");
@@ -58,7 +66,32 @@ const DataDisplay = () => {
 
         const data = await response.json();
         if (response.ok) {
+
+          setPixelData(data);
+          console.log("Received data:", data); // Log the received data
+          const graphData = Object.keys(data.selectedPixel)
+            .filter((key) => wavelengths[key]) // Filter out keys without corresponding wavelengths
+            .map((key) => {
+              return {
+                wavelength: wavelengths[key],
+                reflectance: data.selectedPixel[key] / 100000,
+              };
+            });
+          setGraphData(graphData);
+          console.log("Graph data:", graphData);
+
+          // Generate the initial GPT prompt
+          let initialPrompt =
+            "Analyze the following Landsat 9 data for the selected pixel:\n";
+          Object.entries(data.selectedPixel).forEach(([key, value]) => {
+            initialPrompt += `${key}: ${value}\n`;
+          });
+
+          // Send the initial prompt to GPT
+          fetchGPTResponse(initialPrompt);
+
           handleDataReceived(data);
+
         } else {
           setError(data.error || "An error occurred while fetching data.");
         }
@@ -66,6 +99,50 @@ const DataDisplay = () => {
         setError("Failed to fetch data from the server.");
         console.error(err);
       }
+
+    };
+
+    const fetchGPTResponse = async (prompt) => {
+      setLoadingGPT(true); // Set loading state
+      try {
+        const response = await fetch("/gpt", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prompt }),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          // Add assistant's response to messages
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { role: "assistant", content: data.reply },
+          ]);
+        } else {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            {
+              role: "assistant",
+              content:
+                data.error ||
+                "An error occurred while fetching the assistant's response.",
+            },
+          ]);
+        }
+      } catch (error) {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: "assistant",
+            content: "Failed to get a response from the assistant.",
+          },
+        ]);
+      } finally {
+        setLoadingGPT(false); // Remove loading state
+      }
+
     };
 
     fetchPixelData();
@@ -103,6 +180,39 @@ const DataDisplay = () => {
   const handleClosePopup = () => {
     setShowPopup(false);
   };
+
+
+  const handleChatSubmit = async (e) => {
+    e.preventDefault();
+    if (!userPrompt.trim()) return; // Prevent empty submissions
+    setLoadingGPT(true); // Set loading state
+
+    // Add user's message to messages
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { role: "user", content: userPrompt },
+    ]);
+
+    // Create prompt using selectedPixel data
+    let prompt =
+      "Analyze the following Landsat 9 data for the selected pixel:\n";
+    if (pixelData && pixelData.selectedPixel) {
+      Object.entries(pixelData.selectedPixel).forEach(([key, value]) => {
+        prompt += `${key}: ${value}\n`;
+      });
+    }
+
+    prompt += `\nUser query: ${userPrompt}`;
+
+    try {
+      const response = await fetch("/gpt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: prompt,
+        }),
 
   const handleSaveClick = () => {
     setShowSaveModal(true);
@@ -156,10 +266,41 @@ const DataDisplay = () => {
       const response = await fetch("/get-data", {
         method: "POST",
         body: formData, // Send the FormData directly
+
       });
 
       const data = await response.json();
       if (response.ok) {
+
+        // Add assistant's response to messages
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { role: "assistant", content: data.reply },
+        ]);
+      } else {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: "assistant",
+            content: "An error occurred while fetching GPT response.",
+          },
+        ]);
+      }
+    } catch (error) {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          role: "assistant",
+          content: "Failed to get a response from GPT.",
+        },
+      ]);
+    } finally {
+      setLoadingGPT(false); // Remove loading state
+      setUserPrompt(""); // Clear the user's input
+    }
+  };
+
+
         setSavedData(data); // Set fetched saved data
       } else {
         console.error("Failed to fetch saved data");
@@ -174,10 +315,14 @@ const DataDisplay = () => {
     navigate(`/data-display?latitude=${lat}&longitude=${long}&startDate=${start}&endDate=${end}&cloudCoverage=${cloud}`);
   };
 
+
   if (error) {
     return (
       <>
-        <div className="mb-2">There wasn't any data for the request you submitted. Return back to search?</div>
+        <div className="mb-2">
+          There wasn't any data for the request you submitted. Return back to
+          search?
+        </div>
         <Button variant="contained" color="primary" href="/search">
           Return to Search
         </Button>
@@ -202,11 +347,127 @@ const DataDisplay = () => {
   return (
     <div className="w-full">
       <h1>Landsat 9 Data for Selected Pixel</h1>
+
+
+
       {/* gif */}
       <img src={pixelData.pixelValues[pixelIndex].thumbnail} alt="Landsat 9 Image" />
+
       <div className="chart-container">
         <h3>Wavelength Reflectance Chart for {pixelData.pixelValues[pixelIndex].date}</h3>
         <WavelengthChart graphData={graphData} />
+      </div>
+
+
+      {/* Email Popup Modal */}
+      {showPopup && (
+        <div className="modal show d-block" tabIndex="-1" role="dialog">
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Enter your email</h5>
+                <button
+                  type="button"
+                  className="close"
+                  aria-label="Close"
+                  onClick={handleClosePopup}
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <input
+                  type="email"
+                  className="form-control"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                />
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleSubmit}
+                >
+                  Submit
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleClosePopup}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GPT Chat Section */}
+<div style={{ marginTop: "20px", display: "flex" }}>
+  <div style={{ flex: "1" }}>
+    {/* Chat Box */}
+    <h3>Assistant Chat</h3>
+    <div
+      style={{
+        border: "1px solid #ccc",
+        padding: "10px",
+        width: "100%",
+        minHeight: "300px",
+        maxHeight: "500px",
+        overflowY: "auto",
+        borderRadius: "5px",
+        backgroundColor: "#f9f9f9",
+      }}
+    >
+      {messages.map((msg, index) => (
+        <div
+          key={index}
+          style={{
+            textAlign: msg.role === "user" ? "right" : "left",
+            margin: "10px 0",
+          }}
+        >
+          <div
+            style={{
+              display: "inline-block",
+              padding: "10px",
+              borderRadius: "10px",
+              backgroundColor:
+                msg.role === "user" ? "#dcf8c6" : "#ffffff",
+              maxWidth: "80%",
+              color: "black", // Added this line to set text color
+            }}
+          >
+            <strong>
+              {msg.role === "user" ? "You" : "Assistant"}:
+            </strong>{" "}
+            {msg.content}
+          </div>
+        </div>
+      ))}
+    </div>
+          <form onSubmit={handleChatSubmit} style={{ marginTop: "10px" }}>
+            <textarea
+              className="form-control"
+              rows="3"
+              value={userPrompt}
+              onChange={(e) => setUserPrompt(e.target.value)}
+              placeholder="Enter your query for the assistant"
+              style={{ width: "100%" }} // Make textarea full width
+            />
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loadingGPT}
+              style={{ marginTop: "5px" }}
+            >
+              {loadingGPT ? "Analyzing..." : "Send"}
+            </button>
+          </form>
+        </div>
       </div>
 
       {/* Centered Save Button */}
