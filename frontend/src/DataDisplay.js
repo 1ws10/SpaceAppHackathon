@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import WavelengthChart from "./chart";
 import sampleOutput from "./testing/sampleOutput";
+import wavelengths from "./constants";
 import { Button } from "@mui/material";
 
 const DataDisplay = () => {
@@ -12,24 +13,14 @@ const DataDisplay = () => {
   const [showPopup, setShowPopup] = useState(true); // For showing the email popup
   const [email, setEmail] = useState(""); // For storing email input
 
-  const params = new URLSearchParams(location.search);
-  const latitude = params.get("latitude");
-  const longitude = params.get("longitude");
-  const startDate = params.get("startDate");
-  const endDate = params.get("endDate");
-  const cloudCoverage = params.get("cloudCoverage");
-
-  const wavelengths = {
-    SR_B1: 443,
-    SR_B2: 482,
-    SR_B3: 561,
-    SR_B4: 665,
-    SR_B5: 705,
-    SR_B6: 740,
-    SR_B7: 842,
-  };
-
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const latitude = params.get("latitude");
+    const longitude = params.get("longitude");
+    const startDate = params.get("startDate");
+    const endDate = params.get("endDate");
+    const cloudCoverage = params.get("cloudCoverage");
+
     const fetchPixelData = async () => {
       try {
         const response = await fetch("/search-data", {
@@ -48,18 +39,7 @@ const DataDisplay = () => {
 
         const data = await response.json();
         if (response.ok) {
-          setPixelData(data);
-          console.log("Received data:", data); // Log the received data
-          const graphData = Object.keys(data.selectedPixel)
-            .filter((key) => wavelengths[key]) // Filter out keys without corresponding wavelengths
-            .map((key) => {
-              return {
-                wavelength: wavelengths[key],
-                reflectance: data.selectedPixel[key] / 100000,
-              };
-            });
-          setGraphData(graphData);
-          console.log("Graph data:", graphData);
+          handleDataReceived(data);
         } else {
           setError(data.error || "An error occurred while fetching data.");
         }
@@ -67,11 +47,26 @@ const DataDisplay = () => {
         setError("Failed to fetch data from the server.");
         console.error(err);
       }
-      // setPixelData(sampleOutput); // Use sample data for testing
     };
 
     fetchPixelData();
   }, []);
+
+  const handleDataReceived = (data) => {
+    setPixelData(data);
+    console.log("Received data:", data); // Log the received data
+    const graphData = Object.keys(data.selectedPixel)
+      .filter((key) => wavelengths[key]) // Filter out keys without corresponding wavelengths
+      .map((key) => {
+        return {
+          band: key,
+          wavelength: wavelengths[key],
+          reflectance: data.selectedPixel[key] / 100000,
+        };
+      });
+    setGraphData(graphData);
+    console.log("Graph data:", graphData);
+  };
 
   const handleSubmit = () => {
     console.log("Email submitted:", email);
@@ -88,6 +83,16 @@ const DataDisplay = () => {
         <div className="mb-2">There wasn't any data for the request you submitted. Return back to search?</div>
         <Button variant="contained" color="primary" href="/search">
           Return to Search
+        </Button>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => {
+            handleDataReceived(sampleOutput);
+            setError(null);
+          }}
+        >
+          Use Sample Data (For Development)
         </Button>
       </>
     );
