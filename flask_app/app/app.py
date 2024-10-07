@@ -9,11 +9,13 @@ from flask_mail import Mail, Message
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from flask_apscheduler import APScheduler
+from flask_cors import CORS
 import datetime
 import os
 import ee
 import authentication
 import sqlite3
+import openai 
 
 
 # Initialize the database and scheduler
@@ -21,6 +23,8 @@ db = SQLAlchemy()
 scheduler = APScheduler()
 load_dotenv()
 mail = Mail()
+openai.api_key = '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'
+
 
 # Initialize Google Earth Engine with Service Account Credentials
 def init_earth_engine():
@@ -37,6 +41,7 @@ def init_earth_engine():
 
 def create_app():
     app = Flask(__name__, static_folder='../../frontend/build', static_url_path='/')
+    CORS(app)
 
     app.config.from_object('config.Config')
 
@@ -174,6 +179,38 @@ def create_app():
             'selectedPixel': selected_pixel,
             'surroundingPixels': neighborhood_values
         })
+    
+    @app.route('/gpt', methods=['POST'])
+    def gpt():
+        try:
+            # Extract the prompt from the request
+            data = request.json
+            prompt = data.get("prompt")
+            print(f"prompt {prompt}")
+            # Ensure the prompt is provided
+            if not prompt:
+                return jsonify({"error": "No prompt provided"}), 400
+
+            # Create a chat completion using the correct method
+            response = openai.chat.completions.create(
+                model="gpt-4o",  # Your Assistant model ID
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+
+            # Extract the assistant's response
+            reply = response.choices[0].message.content
+            print(f"reply {reply}")
+
+            # Return the assistant's reply
+            return jsonify({"reply": reply})
+
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+
+        
 
     @app.route('/schedule', methods=['POST'])
     @login_required
