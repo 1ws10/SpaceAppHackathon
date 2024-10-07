@@ -47,7 +47,7 @@ def create_app():
     app.config['MAIL_USE_TLS'] = True
     app.config['MAIL_USE_SSL'] = False
     app.config['MAIL_USERNAME'] = 'spaceapp1232024@outlook.com'
-    app.config['MAIL_PASSWORD'] = 'MyPassword123' #MyPassword123
+    app.config['MAIL_PASSWORD'] = 'Thisismypassword' #MyPassword123
     app.config['MAIL_DEFAULT_SENDER'] = 'spaceapp1232024@outlook.com'
     mail = Mail(app)
 
