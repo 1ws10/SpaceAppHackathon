@@ -117,6 +117,22 @@ const DataDisplay = () => {
         <h3>Wavelength Reflectance Chart</h3>
         <WavelengthChart graphData={graphData} />
       </div>
+      {/* download json */}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => {
+          const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(pixelData));
+          const downloadAnchorNode = document.createElement("a");
+          downloadAnchorNode.setAttribute("href", dataStr);
+          downloadAnchorNode.setAttribute("download", "landsat_data.json");
+          document.body.appendChild(downloadAnchorNode); // required for firefox
+          downloadAnchorNode.click();
+          downloadAnchorNode.remove();
+        }}
+      >
+        Download JSON
+      </Button>
       {/* Email Popup Modal */}
       {showPopup && (
         <div className="modal show d-block" tabIndex="-1" role="dialog">
