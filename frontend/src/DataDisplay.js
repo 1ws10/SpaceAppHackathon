@@ -121,13 +121,12 @@ const DataDisplay = () => {
   };
 
   const handleViewSubmit = async () => {
+    const formData = new FormData();
+    formData.append("email", email);
     try {
       const response = await fetch("/get-data", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
+        body: formData, // Send the FormData directly
       });
 
       const data = await response.json();

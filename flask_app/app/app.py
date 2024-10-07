@@ -74,10 +74,13 @@ def create_app():
         email  = request.form['email']
         cloud = request.form['cloud']
         try:
+            print("test1")
             commands.createData(name, lat, long, start, end, email, cloud)
+            print("test2")
             return jsonify({'message': 'Successfully added to database!'}), 200
-        except:
-            jsonify({'message': 'Unable to save to database!'}), 401
+        except Exception as e:  # Catching specific exceptions is better practice
+            print(f"Error: {e}")  # Log the error for debugging
+            return jsonify({'message': 'Unable to save to database!'}), 401
             
     @app.route('/get-data', methods=['POST'])
     def get_data():
