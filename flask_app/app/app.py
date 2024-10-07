@@ -14,6 +14,7 @@ import os
 import ee
 import authentication
 import sqlite3
+import commands
 
 
 # Initialize the database and scheduler
@@ -62,6 +63,47 @@ def create_app():
         if not loggedIn:
             return jsonify({'message': 'Invalid email or password.'}), 401
         return jsonify({'message': 'Login successful!'}), 200
+    
+    @app.route('/save-data', methods=['POST'])
+    def save():
+        name = request.form['name']
+        lat = request.form['lat']
+        long = request.form['long']
+        start = request.form['start']
+        end = request.form['end']
+        email  = request.form['email']
+        cloud = request.form['cloud']
+        try:
+            commands.createData(name, lat, long, start, end, email, cloud)
+            return jsonify({'message': 'Successfully added to database!'}), 200
+        except:
+            jsonify({'message': 'Unable to save to database!'}), 401
+            
+    @app.route('/get-data', methods=['POST'])
+    def get_data():
+        email = request.form['email']
+        try:
+            all_data = commands.getData(email)
+
+            # Convert rows into a list of dictionaries if necessary
+            # This step depends on how your data is structured. If you're getting rows as tuples,
+            # you can manually format it like this:
+            data = []
+            for row in all_data:
+                data.append({
+                    'name': row[0],  
+                    'lat': row[1],  
+                    'long': row[1],  
+                    'cloud': row[1],  
+                    'start': row[1],  
+                    'end': row[1],  
+                    'email': row[1],  
+                })
+
+            # Return data as JSON
+            return jsonify(data), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
     @app.route('/register', methods=['POST'])
     def register():
