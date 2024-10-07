@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import WavelengthChart from "./chart";
 import sampleOutput from "./testing/sampleOutput";
-import { Button } from "@mui/material";
+
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Typography } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle"; // Import MUI Check Icon
+
 
 const DataDisplay = () => {
   const location = useLocation();
@@ -11,6 +14,8 @@ const DataDisplay = () => {
   const [error, setError] = useState(null);
   const [showPopup, setShowPopup] = useState(true); // For showing the email popup
   const [email, setEmail] = useState(""); // For storing email input
+  const [success, setSuccess] = useState(false); // Success state to show checkmark
+
 
   const params = new URLSearchParams(location.search);
   const latitude = params.get("latitude");
@@ -75,7 +80,11 @@ const DataDisplay = () => {
 
   const handleSubmit = () => {
     console.log("Email submitted:", email);
-    setShowPopup(false); // Close popup after email submission
+    setSuccess(true); // Show success state
+    setTimeout(() => {
+      setShowPopup(false); // Close popup after a delay
+      setSuccess(false); // Reset success state for future uses
+    }, 2000); // Display checkmark for 2 seconds
   };
 
   const handleClosePopup = () => {
@@ -112,32 +121,43 @@ const DataDisplay = () => {
         <h3>Wavelength Reflectance Chart</h3>
         <WavelengthChart graphData={graphData} />
       </div>
-      {/* Email Popup Modal */}
-      {showPopup && (
-        <div className="modal show d-block" tabIndex="-1" role="dialog">
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Enter your email</h5>
-                <button type="button" className="close" aria-label="Close" onClick={handleClosePopup}>
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" />
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-primary" onClick={handleSubmit}>
-                  Submit
-                </button>
-                <button type="button" className="btn btn-secondary" onClick={handleClosePopup}>
-                  Close
-                </button>
-              </div>
+      {/* MUI Email Popup Modal */}
+      <Dialog open={showPopup} onClose={handleClosePopup}>
+        <DialogTitle>Enter email for notifications on the next LandSat overpass</DialogTitle>
+        <DialogContent>
+          {!success ? (
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Email Address"
+              type="email"
+              fullWidth
+              variant="standard"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          ) : (
+            <div style={{ textAlign: "center" }}>
+              <CheckCircleIcon style={{ color: "green", fontSize: 60 }} />
+              <Typography variant="h6" color="green" gutterBottom>
+                Submitted Successfully!
+              </Typography>
             </div>
-          </div>
-        </div>
-      )}
+          )}
+        </DialogContent>
+        <DialogActions>
+          {!success && (
+            <>
+              <Button onClick={handleClosePopup} color="secondary">
+                Close
+              </Button>
+              <Button onClick={handleSubmit} color="primary">
+                Submit
+              </Button>
+            </>
+          )}
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
