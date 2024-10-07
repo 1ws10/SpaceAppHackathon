@@ -26,7 +26,7 @@ notice. Notifications of Overpass Time and Data Availability.
 real-time, allowing users to compare with ground measurements and inform users for decision-making.
 3.	Q&A - The system will provide timely and accurate responses to user questions involving satellite statuses, functionalities, and data specifics, keeping
 users informed with the latest knowledge.
-4.	Live Location Tracking - Request Current Live Location of Landsat 8 and Landsat 9 Satellites, including the exact coordinates with timestamps to enable tracking
+4.	Live Location Tracking via GPT - Request Current Live Location of Landsat 8 and Landsat 9 Satellites, including the exact coordinates with timestamps to enable tracking
 of the position of the satellite in real time.
 
 
