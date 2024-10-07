@@ -2,15 +2,24 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import WavelengthChart from "./chart";
 import sampleOutput from "./testing/sampleOutput";
-
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Typography, List, ListItem } from "@mui/material";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Button,
+  Typography,
+  List,
+  ListItem,
+} from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import wavelengths from "./constants";
 
 const DataDisplay = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
+  const [showPopup, setShowPopup] = useState(true); // For showing the email popup
   const [pixelIndex, setPixelIndex] = useState(0);
   const [pixelData, setPixelData] = useState(null);
   const [graphData, setGraphData] = useState(null);
@@ -78,7 +87,6 @@ const DataDisplay = () => {
 
   const handleDataReceived = (data) => {
     setPixelData(data);
-   
     console.log("Received data:", data); // Log the received data
     const graphData = Object.keys(data.pixelValues[pixelIndex]) // Get keys from the selected pixel data
       .filter((key) => wavelengths[key]) // Filter out keys without corresponding wavelengths
@@ -90,6 +98,10 @@ const DataDisplay = () => {
         };
       });
     setGraphData(graphData);
+  };
+
+  const handleClosePopup = () => {
+    setShowPopup(false);
   };
 
   const handleSaveClick = () => {
@@ -106,13 +118,13 @@ const DataDisplay = () => {
     formData.append("start", startDate);
     formData.append("end", endDate);
     formData.append("cloud", cloudCoverage);
-  
+
     try {
       const response = await fetch("/save-data", {
         method: "POST",
         body: formData, // Send the FormData directly
       });
-  
+
       if (response.ok) {
         setSuccess(true); // Show success state
         setTimeout(() => {
@@ -128,7 +140,6 @@ const DataDisplay = () => {
       console.error("Error saving data", err);
     }
   };
-  
 
   const handleCloseSaveModal = () => {
     setShowSaveModal(false);
@@ -149,7 +160,6 @@ const DataDisplay = () => {
 
       const data = await response.json();
       if (response.ok) {
-
         setSavedData(data); // Set fetched saved data
       } else {
         console.error("Failed to fetch saved data");
@@ -162,7 +172,7 @@ const DataDisplay = () => {
   const handleSelectData = (item) => {
     const { lat, long, start, end, cloud } = item; // Assuming item has these properties
     navigate(`/data-display?latitude=${lat}&longitude=${long}&startDate=${start}&endDate=${end}&cloudCoverage=${cloud}`);
-};
+  };
 
   if (error) {
     return (
@@ -192,7 +202,8 @@ const DataDisplay = () => {
   return (
     <div className="w-full">
       <h1>Landsat 9 Data for Selected Pixel</h1>
-
+      {/* gif */}
+      <img src={pixelData.pixelValues[pixelIndex].thumbnail} alt="Landsat 9 Image" />
       <div className="chart-container">
         <h3>Wavelength Reflectance Chart for {pixelData.pixelValues[pixelIndex].date}</h3>
         <WavelengthChart graphData={graphData} />
@@ -211,6 +222,76 @@ const DataDisplay = () => {
       {/* Save Modal */}
       <Dialog open={showSaveModal} onClose={handleCloseSaveModal}>
         <DialogTitle>Enter details to save this query</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Name"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <TextField
+            margin="dense"
+            label="Email Address"
+            type="email"
+            fullWidth
+            variant="standard"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          {success && (
+            <div style={{ textAlign: "center" }}>
+              <CheckCircleIcon style={{ color: "green", fontSize: 60 }} />
+              <Typography variant="h6" color="green" gutterBottom>
+                Saved Successfully!
+              </Typography>
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseSaveModal} color="secondary">
+            Close
+          </Button>
+          <Button onClick={handleSaveSubmit} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* View Modal */}
+      <Dialog open={showViewModal} onClose={() => setShowViewModal(false)}>
+        <DialogTitle>Enter your email to view saved queries</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Email Address"
+            type="email"
+            fullWidth
+            variant="standard"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Button variant="contained" color="primary" onClick={handleViewSubmit} style={{ marginTop: "10px" }}>
+            Fetch Saved Data
+          </Button>
+          <List>
+            {savedData.map((item, index) => (
+              <ListItem button key={index} onClick={() => handleSelectData(item)}>
+                {item.name} {/* Assuming each saved data item has a name property */}
+              </ListItem>
+            ))}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowViewModal(false)} color="secondary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <section className="w-full flex justify-between my-4">
         <Button
@@ -251,6 +332,7 @@ const DataDisplay = () => {
           Next Date
         </Button>
       </section>
+
       {/* MUI Email Popup Modal */}
       <Dialog open={showPopup} onClose={handleClosePopup}>
         <DialogTitle>Enter email for notifications on the next LandSat overpass</DialogTitle>
@@ -288,48 +370,14 @@ const DataDisplay = () => {
           )}
         </DialogContent>
         <DialogActions>
-          {!success && (
-            <>
-              <Button onClick={handleCloseSaveModal} color="secondary">
-                Close
-              </Button>
-              <Button onClick={handleSaveSubmit} color="primary">
-                Save
-              </Button>
-            </>
-          )}
-        </DialogActions>
-      </Dialog>
-
-      {/* View Modal */}
-      <Dialog open={showViewModal} onClose={() => setShowViewModal(false)}>
-        <DialogTitle>Enter your email to view saved queries</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Email Address"
-            type="email"
-            fullWidth
-            variant="standard"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Button variant="contained" color="primary" onClick={handleViewSubmit} style={{ marginTop: "10px" }}>
-            Fetch Saved Data
-          </Button>
-          <List>
-            {savedData.map((item, index) => (
-              <ListItem button key={index} onClick={() => handleSelectData(item)}>
-                {item.name} {/* Assuming each saved data item has a name property */}
-              </ListItem>
-            ))}
-          </List>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowViewModal(false)} color="secondary">
+          <Button onClick={handleClosePopup} color="secondary">
             Close
           </Button>
+          {!success && (
+            <Button onClick={handleSaveSubmit} color="primary">
+              Save
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </div>
