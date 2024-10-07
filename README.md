@@ -6,12 +6,12 @@ Website: http://127.0.0.1:5000
 Authors:
 ___________
 
-1. Warda Saleh : warda.mu01@gmail.com
-2. Jack Rubio  :
-3. Pramit      :
-4. Donyal      :
-5. Kyle        :
-6. Cameron     :
+1. Warda Saleh    : warda.mu01@gmail.com
+2. Jack Rubio     : rubiojack123@gmail.com
+3. Pramit Shende  : pramitshende@gmail.com
+4. Donyal         :
+5. Kyle           :
+6. Cameron Angle  : camronangled@gmail.com
 
 
 
