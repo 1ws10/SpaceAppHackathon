@@ -140,35 +140,30 @@ def create_app():
 
         point = ee.Geometry.Point([longitude, latitude])
 
-
         # Filter the Landsat 9 image collection
-        # collection = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
-        #     .filterDate(start_date, end_date) \
-        #     .filterBounds(point) \
-        #     .filter(ee.Filter.lt('CLOUD_COVER', cloud_coverage))
         landsat_sr = ee.ImageCollection('LANDSAT/LC09/C02/T1_L2') \
                 .filterBounds(point) \
                 .filterDate(start_date, end_date) \
                 .filter(ee.Filter.lt('CLOUD_COVER', cloud_coverage))
 
-        # Get the first image from the collection
-        # image = collection.first()
-        image = landsat_sr.first()
-        # Check if an image exists
-        if image.getInfo() is None:
-            return jsonify({'error': 'No images found for the given parameters.'}), 404
+        # Get the list of images in the collection
+        images = landsat_sr.toList(landsat_sr.size())
 
-        # Get the pixel value at the point
-        selected_pixel = image.sample(point, scale=30).first().toDictionary().getInfo()
+        # Initialize an empty list to store pixel values
+        pixel_values = []
 
-        # Get surrounding pixels (e.g., a 3x3 window around the point)
-        neighborhood = image.neighborhoodToArray(ee.Kernel.square(1))
-        neighborhood_values = neighborhood.sample(point, scale=30).first().toDictionary().getInfo()
+        # Loop through each image and get the pixel value at the point
+        for i in range(images.size().getInfo()):
+            image = ee.Image(images.get(i))
+            pixel_value = image.sample(point, scale=30).first().toDictionary().getInfo()
+            image_thumbnail = image.getThumbURL({'dimensions': 128, 'bands': ['SR_B4', 'SR_B3', 'SR_B2']})
+            pixel_value['date'] = image.date().format('YYYY-MM-dd').getInfo()
+            pixel_value['thumbnail'] = image_thumbnail
+            pixel_values.append(pixel_value)
 
-        # Return the pixel data
+        # Return the pixel data along with the GIF URL
         return jsonify({
-            'selectedPixel': selected_pixel,
-            'surroundingPixels': neighborhood_values
+            'pixelValues': pixel_values,
         })
 
 
