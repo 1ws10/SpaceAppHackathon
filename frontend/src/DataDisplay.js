@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import WavelengthChart from "./chart";
 import sampleOutput from "./testing/sampleOutput";
+import { Button } from "@mui/material";
 
 const DataDisplay = () => {
   const location = useLocation();
@@ -49,12 +50,12 @@ const DataDisplay = () => {
         if (response.ok) {
           setPixelData(data);
           console.log("Received data:", data); // Log the received data
-          const graphData = Object.keys(sampleOutput.selectedPixel)
+          const graphData = Object.keys(data.selectedPixel)
             .filter((key) => wavelengths[key]) // Filter out keys without corresponding wavelengths
             .map((key) => {
               return {
                 wavelength: wavelengths[key],
-                reflectance: sampleOutput.selectedPixel[key] / 100000,
+                reflectance: data.selectedPixel[key] / 100000,
               };
             });
           setGraphData(graphData);
@@ -82,7 +83,14 @@ const DataDisplay = () => {
   };
 
   if (error) {
-    return <div>{error}</div>;
+    return (
+      <>
+        <div className="mb-2">There wasn't any data for the request you submitted. Return back to search?</div>
+        <Button variant="contained" color="primary" href="/search">
+          Return to Search
+        </Button>
+      </>
+    );
   }
 
   if (!pixelData) {
