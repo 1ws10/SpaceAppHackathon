@@ -85,9 +85,6 @@ def create_app():
         try:
             all_data = commands.getData(email)
 
-            # Convert rows into a list of dictionaries if necessary
-            # This step depends on how your data is structured. If you're getting rows as tuples,
-            # you can manually format it like this:
             data = []
             for row in all_data:
                 data.append({
